@@ -4,10 +4,10 @@
  */
 define(['N/format', 'N/record', 'N/search'],
     /**
- * @param{format} format
- * @param{record} record
- * @param{search} search
- */
+   * @param{format} format
+   * @param{record} record
+   * @param{search} search
+   */
     (format, record, search) => {
         /**
          * Defines the function that is executed at the beginning of the map/reduce process and generates the input data.
@@ -36,8 +36,17 @@ define(['N/format', 'N/record', 'N/search'],
                             ["stage", "anyof", "CUSTOMER"],
                             "AND",
                             ["shippingaddress.custrecord_ptg_tipo_contacto", "anyof", "2", "4"],
-                            "AND",
-                            ["internalid", "anyof", "15838"]
+                            "AND",                            
+                            //["internalid", "anyof", "323002"]
+                            //["internalid", "anyof", "16061"]
+                            //["internalid", "anyof", "323003"]
+                            //["internalid", "anyof", "322143"]                            
+                            //["internalid", "anyof", "15594"]
+                            //["internalid", "anyof", "323018"]
+                            //["internalid", "anyof", "323019"]
+                            //["internalid", "anyof", "323020"]
+                            ["internalid", "anyof", "323002", "16061", "323003", "322143", "15594", "323018", "323019", "323020"]
+                            
                         ],
                     columns:
                         [
@@ -312,7 +321,22 @@ define(['N/format', 'N/record', 'N/search'],
                                 join: "Address",
                                 label: "PTG - RUTA ASIGNADA 4"
                             }),
-                            search.createColumn({name: "custentity_ptg_plantarelacionada_", label: "PTG - Planta relacionada: "})
+                            search.createColumn({ name: "custentity_ptg_plantarelacionada_", label: "PTG - Planta relacionada: " }),
+                            search.createColumn({
+                                name: "custrecord_ptg_rango_dias",
+                                join: "CUSTENTITY_PTG_PLANTARELACIONADA_",
+                                label: "PTG - RANGO DE DIAS"
+                            }),
+                            search.createColumn({
+                                name: "custrecord_ptg_entrega_pedidos_domingo",
+                                join: "CUSTENTITY_PTG_PLANTARELACIONADA_",
+                                label: "PTG - ENTREGA PEDIDOS EN DOMINGO"
+                            }),
+                            search.createColumn({ name: "custentity_ptg_condicion_credito", label: "PTG - CONDICION DE CREDITO" }),
+                            search.createColumn({ name: "creditlimit", label: "CREDIT LIMIT" }),
+                            search.createColumn({ name: "balance", label: "BALANCE" }),
+                            search.createColumn({ name: "overduebalance", label: "OVERDUE BALANCE" }),
+
                         ]
                 });
 
@@ -391,33 +415,35 @@ define(['N/format', 'N/record', 'N/search'],
                 //log.debug('contactType', contactType)
 
                 //Validamos que sea el tipo programado o aviso
-                if (Number(contactType) == 4 && (clienAlliance == 1 || clienAlliance == 2 || clientType == 3)) {
+                if (Number(contactType) == 4 && (clienAlliance == 1 || clienAlliance == 2 || clientType == 3 || clientType == 2 || clientType == 1)) {
                     log.debug('progromado', infoCustomer)
                     //Validar si es día, semana o mensual
                     let typeService = infoCustomer.values["custrecord_ptg_tipo_servicio.Address"];
                     let typeFrequency = infoCustomer.values["custrecord_ptg_periodo_contacto.Address"].value;
                     let customer = infoCustomer.values.internalid.value;
-                    let existOP = validExistOp(Number(customer), Number(contactType), infoCustomer.values["addressinternalid.Address"]);
+                    let lessDates = Number(infoCustomer.values["custrecord_ptg_rango_dias.CUSTENTITY_PTG_PLANTARELACIONADA_"]) || '';
+                    let existOP = validExistOp(Number(customer), Number(contactType), infoCustomer.values["addressinternalid.Address"], typeFrequency, lessDates);
                     log.debug('existOP antes del switch', existOP)
                     switch (typeFrequency) {
                         //Dias
-                        case "1":
+                        case "4":
                             log.debug('dia', typeFrequency)
                             //Validar si le toca hoy el servicio 
                             // let makeServiceDay = validServiceAll(typeFrequency, week, infoCustomer.values.datecreated);
                             // log.debug('makeServiceDay', makeServiceDay)
                             //nueva validacion si es la fecha en que le toca servicio
                             let makeServiceDay = validServiceAll(infoCustomer, typeFrequency, week, dates);
-                            log.debug('makeserviceweek', makeServiceWeek)
+                            log.debug('makeServiceDay', makeServiceDay)
+                            log.debug('customer updated', infoCustomer)
                             //Validamos el tipo de servicio si es cilindro , estacionario o mixto
                             log.debug('existOP día programado', existOP)
-                            if (!!typeService && Number(typeService.value) == 1 && makeServiceDay && !existOP) {
+                            if (!!typeService && Number(typeService.value) == 1 && makeServiceDay.success && !existOP) {
                                 log.debug('typeService', 'clindro')
                                 makeOPCilindro(typeService.value, infoCustomer, Number(contactType));
-                            } else if (!!typeService && Number(typeService.value) == 2 && makeServiceDay && !existOP) {
+                            } else if (!!typeService && Number(typeService.value) == 2 && makeServiceDay.success && !existOP) {
                                 log.debug('typeService', 'estacionario')
                                 makeOPEstacionario(typeService.value, infoCustomer, Number(contactType));
-                            } else if (!!typeService && Number(typeService.value) == 4 && makeServiceDay && !existOP) {
+                            } else if (!!typeService && Number(typeService.value) == 4 && makeServiceDay.success && !existOP) {
                                 log.debug('typeService', 'ambos')
                                 makeOPCilindro(typeService.value, infoCustomer, Number(contactType));
                                 makeOPEstacionario(typeService.value, infoCustomer, Number(contactType));
@@ -427,21 +453,22 @@ define(['N/format', 'N/record', 'N/search'],
                         //Semanal
                         case "2":
                             log.debug('semana', typeFrequency)
-                            //Validar si le toca hoy el servicio                             
-                            //let makeServiceWeek = validService(typeFrequency, week, infoCustomer.values.datecreated, Number(infoCustomer.values["custrecord_ptg_cada.Address"]));
+                            // //Validar si le toca hoy el servicio                             
+                            // //let makeServiceWeek = validService(typeFrequency, week, infoCustomer.values.datecreated, Number(infoCustomer.values["custrecord_ptg_cada.Address"]));
 
                             //nueva validacion si es la fecha en que le toca servicio
                             let makeServiceWeek = validServiceAll(infoCustomer, typeFrequency, week, dates);
                             log.debug('makeserviceweek', makeServiceWeek)
+                            log.debug('customer updated', infoCustomer)
                             //Validamos el tipo de servicio si es cilindro , estacionario o mixto y que no tenga creada una oportunidad                                                                                    
                             //log.debug('existOP', existOP)
-                            if (!!typeService && Number(typeService.value) == 1 && makeServiceWeek && !existOP) {
+                            if (!!typeService && Number(typeService.value) == 1 && makeServiceWeek.success && !existOP) {
                                 log.debug('typeService', 'clindro')
                                 makeOPCilindro(typeService.value, infoCustomer, Number(contactType));
-                            } else if (!!typeService && Number(typeService.value) == 2 && makeServiceWeek && !existOP) {
+                            } else if (!!typeService && Number(typeService.value) == 2 && makeServiceWeek.success && !existOP) {
                                 log.debug('typeService', 'estacionario')
                                 makeOPEstacionario(typeService.value, infoCustomer, Number(contactType));
-                            } else if (!!typeService && Number(typeService.value) == 4 && makeServiceWeek && !existOP) {
+                            } else if (!!typeService && Number(typeService.value) == 4 && makeServiceWeek.success && !existOP) {
                                 log.debug('typeService', 'ambos')
                                 makeOPCilindro(typeService.value, infoCustomer, Number(contactType));
                                 makeOPEstacionario(typeService.value, infoCustomer, Number(contactType));
@@ -451,21 +478,64 @@ define(['N/format', 'N/record', 'N/search'],
                         //Mensual
                         case "3":
                             log.debug('mensual', typeFrequency)
-                            //Validar si le toca hoy el servicio 
-                            // let makeServiceMounth = validService(typeFrequency, week, infoCustomer.values.datecreated);
-                            // log.debug('makeServiceMounth', makeServiceMounth)
+                            // //Validar si le toca hoy el servicio 
+                            // // let makeServiceMounth = validService(typeFrequency, week, infoCustomer.values.datecreated);
+                            // // log.debug('makeServiceMounth', makeServiceMounth)
                             //nueva validacion si es la fecha en que le toca servicio
                             let makeServiceMounth = validServiceAll(infoCustomer, typeFrequency, week, dates);
                             log.debug('makeServiceMounth', makeServiceMounth)
+                            log.debug('customer updated', infoCustomer)
 
                             //Validamos el tipo de servicio si es cilindro , estacionario o mixto                         
-                            if (!!typeService && Number(typeService.value) == 1 && makeServiceMounth && !existOP) {
+                            if (!!typeService && Number(typeService.value) == 1 && makeServiceMounth.success && !existOP) {
                                 log.debug('typeService', 'clindro')
                                 makeOPCilindro(typeService.value, infoCustomer, Number(contactType));
-                            } else if (!!typeService && Number(typeService.value) == 2 && makeServiceMounth && !existOP) {
+                            } else if (!!typeService && Number(typeService.value) == 2 && makeServiceMounth.success && !existOP) {
                                 log.debug('typeService', 'estacionario')
                                 makeOPEstacionario(typeService.value, infoCustomer, Number(contactType));
-                            } else if (!!typeService && Number(typeService.value) == 4 && makeServiceMounth && !existOP) {
+                            } else if (!!typeService && Number(typeService.value) == 4 && makeServiceMounth.success && !existOP) {
+                                log.debug('typeService', 'ambos')
+                                makeOPCilindro(typeService.value, infoCustomer, Number(contactType));
+                                makeOPEstacionario(typeService.value, infoCustomer, Number(contactType));
+                            }
+
+                            break;
+
+                        case "5":
+                            log.debug('mensual por fecha', typeFrequency)
+                            // //nueva validacion si es la fecha en que le toca servicio
+                            let makeServiceMounthDay = validServiceAll(infoCustomer, typeFrequency, week, dates);
+                            log.debug('makeServiceMounthDay', makeServiceMounthDay)
+                            log.debug('customer updated', infoCustomer)
+                            //Validamos el tipo de servicio si es cilindro , estacionario o mixto                         
+                            if (!!typeService && Number(typeService.value) == 1 && makeServiceMounthDay.success && !existOP) {
+                                log.debug('typeService', 'clindro')
+                                makeOPCilindro(typeService.value, infoCustomer, Number(contactType));
+                            } else if (!!typeService && Number(typeService.value) == 2 && makeServiceMounthDay.success && !existOP) {
+                                log.debug('typeService', 'estacionario')
+                                makeOPEstacionario(typeService.value, infoCustomer, Number(contactType));
+                            } else if (!!typeService && Number(typeService.value) == 4 && makeServiceMounthDay.success && !existOP) {
+                                log.debug('typeService', 'ambos')
+                                makeOPCilindro(typeService.value, infoCustomer, Number(contactType));
+                                makeOPEstacionario(typeService.value, infoCustomer, Number(contactType));
+                            }
+
+                            break;
+
+                        case "1":
+                            log.debug('mensual por fecha', typeFrequency)
+                            //nueva validacion si es la fecha en que le toca servicio
+                            let makeServiceAtDay = validServiceAll(infoCustomer, typeFrequency, week, dates);
+                            log.debug('makeServiceAtDay', makeServiceAtDay)
+                            log.debug('customer updated', infoCustomer)
+                            //Validamos el tipo de servicio si es cilindro , estacionario o mixto                         
+                            if (!!typeService && Number(typeService.value) == 1 && makeServiceAtDay.success && !existOP) {
+                                log.debug('typeService', 'clindro')
+                                makeOPCilindro(typeService.value, infoCustomer, Number(contactType));
+                            } else if (!!typeService && Number(typeService.value) == 2 && makeServiceAtDay.success && !existOP) {
+                                log.debug('typeService', 'estacionario')
+                                makeOPEstacionario(typeService.value, infoCustomer, Number(contactType));
+                            } else if (!!typeService && Number(typeService.value) == 4 && makeServiceAtDay.success && !existOP) {
                                 log.debug('typeService', 'ambos')
                                 makeOPCilindro(typeService.value, infoCustomer, Number(contactType));
                                 makeOPEstacionario(typeService.value, infoCustomer, Number(contactType));
@@ -482,23 +552,24 @@ define(['N/format', 'N/record', 'N/search'],
                     let existOP = validExistOp(Number(customer), Number(contactType), infoCustomer.values["addressinternalid.Address"]);
                     switch (typeFrequency) {
                         //Dias
-                        case "1":
+                        case "4":
                             log.debug('dia', typeFrequency)
                             //Validar si le toca hoy el servicio 
-                            // let makeServiceDay = validService(typeFrequency, week, infoCustomer.values.datecreated);
+                            // let makeServiceDay = validServiceAll(typeFrequency, week, infoCustomer.values.datecreated);
                             // log.debug('makeServiceDay', makeServiceDay)
-                            // log.debug('existOP día aviso', existOP)
                             //nueva validacion si es la fecha en que le toca servicio
                             let makeServiceDay = validServiceAll(infoCustomer, typeFrequency, week, dates);
                             log.debug('makeServiceDay', makeServiceDay)
+                            log.debug('customer updated', infoCustomer)
                             //Validamos el tipo de servicio si es cilindro , estacionario o mixto
-                            if (!!typeService && Number(typeService.value) == 1 && makeServiceDay && !existOP) {
+                            log.debug('existOP día aviso', existOP)
+                            if (!!typeService && Number(typeService.value) == 1 && makeServiceDay.success && !existOP) {
                                 log.debug('typeService', 'clindro')
                                 makeOPCilindro(typeService.value, infoCustomer, Number(contactType));
-                            } else if (!!typeService && Number(typeService.value) == 2 && makeServiceDay && !existOP) {
+                            } else if (!!typeService && Number(typeService.value) == 2 && makeServiceDay.success && !existOP) {
                                 log.debug('typeService', 'estacionario')
                                 makeOPEstacionario(typeService.value, infoCustomer, Number(contactType));
-                            } else if (!!typeService && Number(typeService.value) == 4 && makeServiceDay && !existOP) {
+                            } else if (!!typeService && Number(typeService.value) == 4 && makeServiceDay.success && !existOP) {
                                 log.debug('typeService', 'ambos')
                                 makeOPCilindro(typeService.value, infoCustomer, Number(contactType));
                                 makeOPEstacionario(typeService.value, infoCustomer, Number(contactType));
@@ -508,21 +579,22 @@ define(['N/format', 'N/record', 'N/search'],
                         //Semanal
                         case "2":
                             log.debug('semana', typeFrequency)
-                            //Validar si le toca hoy el servicio                             
-                            // let makeServiceWeek = validServiceAviso(typeFrequency, week, infoCustomer.values.datecreated, Number(infoCustomer.values["custrecord_ptg_cada.Address"]));
-                            // log.debug('makeservice', makeServiceWeek)
+                            // //Validar si le toca hoy el servicio                             
+                            // //let makeServiceWeek = validService(typeFrequency, week, infoCustomer.values.datecreated, Number(infoCustomer.values["custrecord_ptg_cada.Address"]));
+
                             //nueva validacion si es la fecha en que le toca servicio
                             let makeServiceWeek = validServiceAll(infoCustomer, typeFrequency, week, dates);
-                            log.debug('makeServiceWeek', makeServiceWeek)
+                            log.debug('makeserviceweek', makeServiceWeek)
+                            log.debug('customer updated', infoCustomer)
                             //Validamos el tipo de servicio si es cilindro , estacionario o mixto y que no tenga creada una oportunidad                                                                                    
-                            log.debug('existOP', existOP)
-                            if (!!typeService && Number(typeService.value) == 1 && makeServiceWeek && !existOP) {
+                            //log.debug('existOP', existOP)
+                            if (!!typeService && Number(typeService.value) == 1 && makeServiceWeek.success && !existOP) {
                                 log.debug('typeService', 'clindro')
                                 makeOPCilindro(typeService.value, infoCustomer, Number(contactType));
-                            } else if (!!typeService && Number(typeService.value) == 2 && makeServiceWeek && !existOP) {
+                            } else if (!!typeService && Number(typeService.value) == 2 && makeServiceWeek.success && !existOP) {
                                 log.debug('typeService', 'estacionario')
                                 makeOPEstacionario(typeService.value, infoCustomer, Number(contactType));
-                            } else if (!!typeService && Number(typeService.value) == 4 && makeServiceWeek && !existOP) {
+                            } else if (!!typeService && Number(typeService.value) == 4 && makeServiceWeek.success && !existOP) {
                                 log.debug('typeService', 'ambos')
                                 makeOPCilindro(typeService.value, infoCustomer, Number(contactType));
                                 makeOPEstacionario(typeService.value, infoCustomer, Number(contactType));
@@ -532,19 +604,64 @@ define(['N/format', 'N/record', 'N/search'],
                         //Mensual
                         case "3":
                             log.debug('mensual', typeFrequency)
-                            //Validar si le toca hoy el servicio 
-                            // let makeServiceMounth = validService(typeFrequency, week, infoCustomer.values.datecreated);
-                            // log.debug('makeServiceMounth', makeServiceMounth)
+                            // //Validar si le toca hoy el servicio 
+                            // // let makeServiceMounth = validService(typeFrequency, week, infoCustomer.values.datecreated);
+                            // // log.debug('makeServiceMounth', makeServiceMounth)
+                            //nueva validacion si es la fecha en que le toca servicio
                             let makeServiceMounth = validServiceAll(infoCustomer, typeFrequency, week, dates);
                             log.debug('makeServiceMounth', makeServiceMounth)
+                            log.debug('customer updated', infoCustomer)
+
                             //Validamos el tipo de servicio si es cilindro , estacionario o mixto                         
-                            if (!!typeService && Number(typeService.value) == 1 && makeServiceMounth && !existOP) {
+                            if (!!typeService && Number(typeService.value) == 1 && makeServiceMounth.success && !existOP) {
                                 log.debug('typeService', 'clindro')
                                 makeOPCilindro(typeService.value, infoCustomer, Number(contactType));
-                            } else if (!!typeService && Number(typeService.value) == 2 && makeServiceMounth && !existOP) {
+                            } else if (!!typeService && Number(typeService.value) == 2 && makeServiceMounth.success && !existOP) {
                                 log.debug('typeService', 'estacionario')
                                 makeOPEstacionario(typeService.value, infoCustomer, Number(contactType));
-                            } else if (!!typeService && Number(typeService.value) == 4 && makeServiceMounth && !existOP) {
+                            } else if (!!typeService && Number(typeService.value) == 4 && makeServiceMounth.success && !existOP) {
+                                log.debug('typeService', 'ambos')
+                                makeOPCilindro(typeService.value, infoCustomer, Number(contactType));
+                                makeOPEstacionario(typeService.value, infoCustomer, Number(contactType));
+                            }
+
+                            break;
+
+                        case "5":
+                            log.debug('mensual por fecha', typeFrequency)
+                            // //nueva validacion si es la fecha en que le toca servicio
+                            let makeServiceMounthDay = validServiceAll(infoCustomer, typeFrequency, week, dates);
+                            log.debug('makeServiceMounthDay', makeServiceMounthDay)
+                            log.debug('customer updated', infoCustomer)
+                            //Validamos el tipo de servicio si es cilindro , estacionario o mixto                         
+                            if (!!typeService && Number(typeService.value) == 1 && makeServiceMounthDay.success && !existOP) {
+                                log.debug('typeService', 'clindro')
+                                makeOPCilindro(typeService.value, infoCustomer, Number(contactType));
+                            } else if (!!typeService && Number(typeService.value) == 2 && makeServiceMounthDay.success && !existOP) {
+                                log.debug('typeService', 'estacionario')
+                                makeOPEstacionario(typeService.value, infoCustomer, Number(contactType));
+                            } else if (!!typeService && Number(typeService.value) == 4 && makeServiceMounthDay.success && !existOP) {
+                                log.debug('typeService', 'ambos')
+                                makeOPCilindro(typeService.value, infoCustomer, Number(contactType));
+                                makeOPEstacionario(typeService.value, infoCustomer, Number(contactType));
+                            }
+
+                            break;
+
+                        case "1":
+                            log.debug('mensual por fecha', typeFrequency)
+                            //nueva validacion si es la fecha en que le toca servicio
+                            let makeServiceAtDay = validServiceAll(infoCustomer, typeFrequency, week, dates);
+                            log.debug('makeServiceAtDay', makeServiceAtDay)
+                            log.debug('customer updated', infoCustomer)
+                            //Validamos el tipo de servicio si es cilindro , estacionario o mixto                         
+                            if (!!typeService && Number(typeService.value) == 1 && makeServiceAtDay.success && !existOP) {
+                                log.debug('typeService', 'clindro')
+                                makeOPCilindro(typeService.value, infoCustomer, Number(contactType));
+                            } else if (!!typeService && Number(typeService.value) == 2 && makeServiceAtDay.success && !existOP) {
+                                log.debug('typeService', 'estacionario')
+                                makeOPEstacionario(typeService.value, infoCustomer, Number(contactType));
+                            } else if (!!typeService && Number(typeService.value) == 4 && makeServiceAtDay.success && !existOP) {
                                 log.debug('typeService', 'ambos')
                                 makeOPCilindro(typeService.value, infoCustomer, Number(contactType));
                                 makeOPEstacionario(typeService.value, infoCustomer, Number(contactType));
@@ -605,6 +722,23 @@ define(['N/format', 'N/record', 'N/search'],
                         return true;
                     }
                     break;
+                // case "5":
+                //     let initialFormattedDateString = date;
+                //     //log.debug('initialFormattedDateString', initialFormattedDateString)
+                //     let parsedDateStringAsRawDateObject = format.parse({
+                //         value: initialFormattedDateString,
+                //         type: format.Type.DATE,
+                //         timezone: format.Timezone.AMERICA_MEXICO_CITY
+                //     });
+
+                //     let initDate = parsedDateStringAsRawDateObject.getDate();
+                //     let todayMounth = day.getDate();
+                //     log.debug('initDate mounth', initDate)
+                //     log.debug('todayMounth mounth', todayMounth)
+                //     if (initDate == todayMounth) {
+                //         return true;
+                //     }
+                //     break;
             }
 
         }
@@ -669,6 +803,10 @@ define(['N/format', 'N/record', 'N/search'],
                 //timezone: format.Timezone.AMERICA_MEXICO_CITY
             });
 
+            let makeService = {
+                success: false
+            };
+
             let day = nowDate.getDay();
             log.debug('nowDate', nowDate);
             log.debug('day', day)
@@ -682,15 +820,76 @@ define(['N/format', 'N/record', 'N/search'],
             ];
             switch (type) {
                 //Dias
-                case "1":
-                    if (weeks.includes(day) || weeks.includes(day + 1)) {
+                case "4":
+                    if (weeks.includes(day)) {
                         let initialHour = customer.values['custrecord_ptg_entre_las.Address'];
                         log.debug('initialhour turn', initialHour);
                         let hour = getTimeInt(initialHour);
                         log.debug('hour', hour);
                         (hour >= 14) ? customer.values.isMoorning = false : customer.values.isMoorning = true;
-                        return true;
+                        let isSunday = validSunday(new Date(), customer.values['custrecord_ptg_entrega_pedidos_domingo.CUSTENTITY_PTG_PLANTARELACIONADA_']);
+                        log.debug('isSunday Semanal', isSunday)
+                        makeService.success = true;
+                        customer.values.exceptDate = isSunday;
+                        customer.values.dateToUpdate = format.format({
+                            value: new Date(),
+                            type: format.Type.DATE,
+                            timezone: format.Timezone.AMERICA_MEXICO_CITY
+                        });;
+                        customer.values.idFieldDate = false
+                        //return true;
+                    } else if (weeks.includes(day + 1)) {
+                        let initialHour = customer.values['custrecord_ptg_entre_las.Address'];
+                        log.debug('initialhour turn', initialHour);
+                        let hour = getTimeInt(initialHour);
+                        log.debug('hour', hour);
+                        (hour >= 14) ? customer.values.isMoorning = false : customer.values.isMoorning = true;
+                        let isSunday = validSunday(new Date(new Date().setDate(new Date().getDate() + 1)), customer.values['custrecord_ptg_entrega_pedidos_domingo.CUSTENTITY_PTG_PLANTARELACIONADA_']);
+                        log.debug('isSunday Semanal', isSunday)
+                        makeService.success = true;
+                        customer.values.exceptDate = isSunday;
+                        customer.values.dateToUpdate = format.format({
+                            value: new Date(new Date().setDate(new Date().getDate() + 1)),
+                            type: format.Type.DATE,
+                            timezone: format.Timezone.AMERICA_MEXICO_CITY
+                        });;
+                        customer.values.idFieldDate = false
                     }
+                    break;
+
+                case "1":
+                    //obtener la fecha actual y obtener el día
+                    let actualDate = date.getDate();
+                    log.debug('fecha actual', actualDate);
+                    //despues revisar la fecha que se tiene como ultima
+                    let dayCustomer = format.parse({
+                        value: dates[1],
+                        type: format.Type.DATE,
+                        timezone: format.Timezone.AMERICA_MEXICO_CITY
+                    });
+
+                    let dateCustomer = dayCustomer.getDate();
+
+                    log.debug('dateCustomer', dateCustomer);
+
+                    let daysToLess = Number(customer.values['custrecord_ptg_cada.Address']);
+                    log.debug('daysToLess', daysToLess);
+
+                    if (dateCustomer == (actualDate - daysToLess)) {
+                        log.debug('la fecha si cuadra la resta', 'cuadra');
+                        let isSunday = validSunday(date, customer.values['custrecord_ptg_entrega_pedidos_domingo.CUSTENTITY_PTG_PLANTARELACIONADA_']);
+                        log.debug('isSunday', isSunday);
+                        makeService.success = true;
+                        customer.values.exceptDate = isSunday;
+                        customer.values.dateToUpdate = format.format({
+                            value: new Date(),
+                            type: format.Type.DATE,
+                            timezone: format.Timezone.AMERICA_MEXICO_CITY
+                        });;
+                        customer.values.idFieldDate = 'custrecord_ptg_fecha_inicio_servicio';
+
+                    }
+
                     break;
                 //Semanal
                 case "2":
@@ -726,69 +925,19 @@ define(['N/format', 'N/record', 'N/search'],
                             log.debug('hour', hour);
                             (hour >= 14) ? customer.values.isMoorning = false : customer.values.isMoorning = true;
 
-                            let values = {};
                             let fieldId = arrayIds[day]
-                            values[fieldId] = nowDate;
+                            log.debug('fieldId', fieldId)
+                            let isSunday = validSunday(new Date(), customer.values['custrecord_ptg_entrega_pedidos_domingo.CUSTENTITY_PTG_PLANTARELACIONADA_']);
+                            log.debug('isSunday Semanal', isSunday)
+                            makeService.success = true;
+                            customer.values.exceptDate = isSunday;
+                            customer.values.dateToUpdate = format.format({
+                                value: new Date(),
+                                type: format.Type.DATE,
+                                timezone: format.Timezone.AMERICA_MEXICO_CITY
+                            });;
+                            customer.values.idFieldDate = fieldId
 
-                            log.debug('values update', values);
-                            log.debug('customer edited', customer)
-
-                            // record.submitFields({
-                            //     type: 'address',
-                            //     id: customer.values['internalid.Address'].value,
-                            //     values: values
-                            // });
-                            try {
-                                //Cargar el cliente para actualizar la fecha
-                                let customerRecord = record.load({
-                                    type: record.Type.CUSTOMER,
-                                    id: customer.values.internalid.value,
-                                    isDynamic: true
-                                });
-
-                                let lineAddress = customerRecord.findSublistLineWithValue({
-                                    sublistId: 'addressbook',
-                                    fieldId: 'addressbookaddress',
-                                    value: customer.values["internalid.Address"].value
-                                });
-
-                                log.debug('id lineAddress', lineAddress)
-                                customerRecord.selectLine({
-                                    sublistId: 'addressbook',
-                                    line: lineAddress
-                                });
-
-                                let addressSubrecord = customerRecord.getCurrentSublistSubrecord({
-                                    sublistId: 'addressbook',
-                                    fieldId: 'addressbookaddress'
-                                });
-
-                                log.debug('test fecha actual', addressSubrecord.getValue({
-                                    fieldId: arrayIds[day]
-                                }));
-
-                                let dateString = format.format({
-                                    value: new Date(),
-                                    type: format.Type.DATE,
-                                    timezone: format.Timezone.AMERICA_MEXICO_CITY
-                                });
-                                log.debug('dateString', dateString)
-                                addressSubrecord.setText({
-                                    fieldId: arrayIds[day],
-                                    text: dateString
-                                });
-
-                                customerRecord.commitLine({
-                                    sublistId: "addressbook"
-                                });
-                                let id = customerRecord.save();
-                                log.debug('se actualizo', id)
-
-                            } catch (error) {
-                                log.debug('error al actualizar la fecha', error)
-                            }
-
-                            return true;
                         }
 
                     } else if (weeks.includes(day + 1) || weeks.includes(day - 6)) {
@@ -834,69 +983,24 @@ define(['N/format', 'N/record', 'N/search'],
                             log.debug('hour nexDate', hour);
                             (hour >= 14) ? customer.values.isMoorning = false : customer.values.isMoorning = true;
 
-                            let values = {};
+                            //let values = {};
                             let fieldId = arrayIds[finalDay]
-                            values[fieldId] = nextDate;
+                            //values[fieldId] = nextDate;
 
-                            log.debug('values update nextDate', values);
-                            log.debug('customer edited nextDate', customer)
+                            //log.debug('values update nextDate', values);
+                            //log.debug('customer edited nextDate', customer)
+                            log.debug('fieldId', fieldId)
+                            let isSunday = validSunday(new Date(new Date().setDate(new Date().getDate() + 1)), customer.values['custrecord_ptg_entrega_pedidos_domingo.CUSTENTITY_PTG_PLANTARELACIONADA_']);
+                            log.debug('isSunday Semanal', isSunday)
+                            makeService.success = true;
+                            customer.values.exceptDate = isSunday;
+                            customer.values.dateToUpdate = format.format({
+                                value: new Date(new Date().setDate(new Date().getDate() + 1)),
+                                type: format.Type.DATE,
+                                timezone: format.Timezone.AMERICA_MEXICO_CITY
+                            });;
+                            customer.values.idFieldDate = fieldId
 
-                            // record.submitFields({
-                            //     type: 'address',
-                            //     id: customer.values['internalid.Address'].value,
-                            //     values: values
-                            // });
-                            try {
-                                //Cargar el cliente para actualizar la fecha, pudo ser una funcion pero me dio flojera pasarlo
-                                let customerRecord = record.load({
-                                    type: record.Type.CUSTOMER,
-                                    id: customer.values.internalid.value,
-                                    isDynamic: true
-                                });
-
-                                let lineAddress = customerRecord.findSublistLineWithValue({
-                                    sublistId: 'addressbook',
-                                    fieldId: 'addressbookaddress',
-                                    value: customer.values["internalid.Address"].value
-                                });
-
-                                log.debug('id lineAddress', lineAddress)
-                                customerRecord.selectLine({
-                                    sublistId: 'addressbook',
-                                    line: lineAddress
-                                });
-
-                                let addressSubrecord = customerRecord.getCurrentSublistSubrecord({
-                                    sublistId: 'addressbook',
-                                    fieldId: 'addressbookaddress'
-                                });
-
-                                log.debug('test fecha actual', addressSubrecord.getValue({
-                                    fieldId: arrayIds[finalDay]
-                                }));
-
-                                let dateString = format.format({
-                                    value: new Date(new Date().setDate(new Date().getDate() + 1)),
-                                    type: format.Type.DATE,
-                                    timezone: format.Timezone.AMERICA_MEXICO_CITY
-                                });
-                                log.debug('dateString', dateString)
-                                addressSubrecord.setText({
-                                    fieldId: arrayIds[finalDay],
-                                    text: dateString
-                                });
-
-                                customerRecord.commitLine({
-                                    sublistId: "addressbook"
-                                });
-                                let id = customerRecord.save();
-                                log.debug('se actualizo', id)
-
-                            } catch (error) {
-                                log.debug('error al actualizar la fecha', error)
-                            }
-
-                            return true;
                         }
 
                     }
@@ -923,7 +1027,7 @@ define(['N/format', 'N/record', 'N/search'],
                         log.debug('monthActual', monthActual)
 
                         let lastMounthCustomer = format.parse({
-                            value: customer.values['custrecord_ptg_fecha_inicio_servicio.Address'],
+                            value: dates[dayActual],
                             type: format.Type.DATE,
                             timezone: format.Timezone.AMERICA_MEXICO_CITY
                         });
@@ -942,52 +1046,19 @@ define(['N/format', 'N/record', 'N/search'],
                                 log.debug('hour nexDate', hour);
                                 (hour >= 14) ? customer.values.isMoorning = false : customer.values.isMoorning = true;
 
-                                try {
-                                    //Cargar el cliente para actualizar la fecha
-                                    let customerRecord = record.load({
-                                        type: record.Type.CUSTOMER,
-                                        id: customer.values.internalid.value,
-                                        isDynamic: true
-                                    });
+                                let fieldId = arrayIds[dayActual]
+                                log.debug('fieldId', fieldId)
 
-                                    let lineAddress = customerRecord.findSublistLineWithValue({
-                                        sublistId: 'addressbook',
-                                        fieldId: 'addressbookaddress',
-                                        value: customer.values["internalid.Address"].value
-                                    });
-
-                                    log.debug('id lineAddress', lineAddress)
-                                    customerRecord.selectLine({
-                                        sublistId: 'addressbook',
-                                        line: lineAddress
-                                    });
-
-                                    let addressSubrecord = customerRecord.getCurrentSublistSubrecord({
-                                        sublistId: 'addressbook',
-                                        fieldId: 'addressbookaddress'
-                                    });
-
-                                    let dateString = format.format({
-                                        value: new Date(),
-                                        type: format.Type.DATE,
-                                        timezone: format.Timezone.AMERICA_MEXICO_CITY
-                                    });
-                                    log.debug('dateString', dateString)
-                                    addressSubrecord.setText({
-                                        fieldId: 'custrecord_ptg_fecha_inicio_servicio',
-                                        text: dateString
-                                    });
-
-                                    customerRecord.commitLine({
-                                        sublistId: "addressbook"
-                                    });
-                                    let id = customerRecord.save();
-                                    log.debug('se actualizo', id)
-
-                                } catch (error) {
-                                    log.debug('error al actualizar la fecha', error)
-                                }
-                                return true;
+                                let isSunday = validSunday(new Date(), customer.values['custrecord_ptg_entrega_pedidos_domingo.CUSTENTITY_PTG_PLANTARELACIONADA_']);
+                                log.debug('isSunday Semanal', isSunday)
+                                makeService.success = true;
+                                customer.values.exceptDate = isSunday;
+                                customer.values.dateToUpdate = format.format({
+                                    value: new Date(),
+                                    type: format.Type.DATE,
+                                    timezone: format.Timezone.AMERICA_MEXICO_CITY
+                                });;
+                                customer.values.idFieldDate = fieldId;
                             }
 
                             if (weekOfMonth > 5 && weekOfCustomer == 5) {
@@ -999,53 +1070,19 @@ define(['N/format', 'N/record', 'N/search'],
                                 log.debug('hour nexDate', hour);
                                 (hour >= 14) ? customer.values.isMoorning = false : customer.values.isMoorning = true;
 
-                                try {
-                                    //Cargar el cliente para actualizar la fecha
-                                    let customerRecord = record.load({
-                                        type: record.Type.CUSTOMER,
-                                        id: customer.values.internalid.value,
-                                        isDynamic: true
-                                    });
+                                let fieldId = arrayIds[dayActual]
+                                log.debug('fieldId', fieldId)
 
-                                    let lineAddress = customerRecord.findSublistLineWithValue({
-                                        sublistId: 'addressbook',
-                                        fieldId: 'addressbookaddress',
-                                        value: customer.values["internalid.Address"].value
-                                    });
-
-                                    log.debug('id lineAddress', lineAddress)
-                                    customerRecord.selectLine({
-                                        sublistId: 'addressbook',
-                                        line: lineAddress
-                                    });
-
-                                    let addressSubrecord = customerRecord.getCurrentSublistSubrecord({
-                                        sublistId: 'addressbook',
-                                        fieldId: 'addressbookaddress'
-                                    });
-
-                                    let dateString = format.format({
-                                        value: new Date(),
-                                        type: format.Type.DATE,
-                                        timezone: format.Timezone.AMERICA_MEXICO_CITY
-                                    });
-                                    log.debug('dateString', dateString)
-                                    addressSubrecord.setText({
-                                        fieldId: 'custrecord_ptg_fecha_inicio_servicio',
-                                        text: dateString
-                                    });
-
-                                    customerRecord.commitLine({
-                                        sublistId: "addressbook"
-                                    });
-                                    let id = customerRecord.save();
-                                    log.debug('se actualizo', id)
-
-                                } catch (error) {
-                                    log.debug('error al actualizar la fecha', error)
-                                }
-                                return true;
-
+                                let isSunday = validSunday(new Date(), customer.values['custrecord_ptg_entrega_pedidos_domingo.CUSTENTITY_PTG_PLANTARELACIONADA_']);
+                                log.debug('isSunday Semanal', isSunday)
+                                makeService.success = true;
+                                customer.values.exceptDate = isSunday;
+                                customer.values.dateToUpdate = format.format({
+                                    value: new Date(),
+                                    type: format.Type.DATE,
+                                    timezone: format.Timezone.AMERICA_MEXICO_CITY
+                                });;
+                                customer.values.idFieldDate = fieldId;
                             }
                         }
 
@@ -1064,7 +1101,7 @@ define(['N/format', 'N/record', 'N/search'],
                         log.debug('monthActual', monthActual)
 
                         let lastMounthCustomer = format.parse({
-                            value: customer.values['custrecord_ptg_fecha_inicio_servicio.Address'],
+                            value: dates[finalDay],
                             type: format.Type.DATE,
                             timezone: format.Timezone.AMERICA_MEXICO_CITY
                         });
@@ -1083,114 +1120,105 @@ define(['N/format', 'N/record', 'N/search'],
                                 log.debug('hour nexDate', hour);
                                 (hour >= 14) ? customer.values.isMoorning = false : customer.values.isMoorning = true;
 
-                                try {
-                                    //Cargar el cliente para actualizar la fecha
-                                    let customerRecord = record.load({
-                                        type: record.Type.CUSTOMER,
-                                        id: customer.values.internalid.value,
-                                        isDynamic: true
-                                    });
+                                let fieldId = arrayIds[finalDay]
+                                log.debug('fieldId', fieldId)
 
-                                    let lineAddress = customerRecord.findSublistLineWithValue({
-                                        sublistId: 'addressbook',
-                                        fieldId: 'addressbookaddress',
-                                        value: customer.values["internalid.Address"].value
-                                    });
-
-                                    log.debug('id lineAddress', lineAddress)
-                                    customerRecord.selectLine({
-                                        sublistId: 'addressbook',
-                                        line: lineAddress
-                                    });
-
-                                    let addressSubrecord = customerRecord.getCurrentSublistSubrecord({
-                                        sublistId: 'addressbook',
-                                        fieldId: 'addressbookaddress'
-                                    });
-
-                                    let dateString = format.format({
-                                        value: new Date(new Date().setDate(new Date().getDate() + 1)),
-                                        type: format.Type.DATE,
-                                        timezone: format.Timezone.AMERICA_MEXICO_CITY
-                                    });
-                                    log.debug('dateString', dateString)
-                                    addressSubrecord.setText({
-                                        fieldId: 'custrecord_ptg_fecha_inicio_servicio',
-                                        text: dateString
-                                    });
-
-                                    customerRecord.commitLine({
-                                        sublistId: "addressbook"
-                                    });
-                                    let id = customerRecord.save();
-                                    log.debug('se actualizo', id)
-
-                                } catch (error) {
-                                    log.debug('error al actualizar la fecha', error)
-                                }
-                                return true;
+                                let isSunday = validSunday(new Date(new Date().setDate(new Date().getDate() + 1)), customer.values['custrecord_ptg_entrega_pedidos_domingo.CUSTENTITY_PTG_PLANTARELACIONADA_']);
+                                log.debug('isSunday Semanal', isSunday)
+                                makeService.success = true;
+                                customer.values.exceptDate = isSunday;
+                                customer.values.dateToUpdate = format.format({
+                                    value: new Date(new Date().setDate(new Date().getDate() + 1)),
+                                    type: format.Type.DATE,
+                                    timezone: format.Timezone.AMERICA_MEXICO_CITY
+                                });;
+                                customer.values.idFieldDate = fieldId;
                             }
 
                             if (weekOfMonth > 5 && weekOfCustomer == 5) {
-                                try {
-                                    //Tienen la misma fecha y ahora toca definir la hora para saber que turno sera
-                                    let initialHour = customer.values['custrecord_ptg_entre_las.Address'];
-                                    log.debug('initialhour turn nextDate', initialHour);
-                                    let hour = getTimeInt(initialHour);
-                                    log.debug('hour nexDate', hour);
-                                    (hour >= 14) ? customer.values.isMoorning = false : customer.values.isMoorning = true;
-                                    //Cargar el cliente para actualizar la fecha
-                                    let customerRecord = record.load({
-                                        type: record.Type.CUSTOMER,
-                                        id: customer.values.internalid.value,
-                                        isDynamic: true
-                                    });
+                                //try {
+                                //Tienen la misma fecha y ahora toca definir la hora para saber que turno sera
+                                let initialHour = customer.values['custrecord_ptg_entre_las.Address'];
+                                log.debug('initialhour turn nextDate', initialHour);
+                                let hour = getTimeInt(initialHour);
+                                log.debug('hour nexDate', hour);
+                                (hour >= 14) ? customer.values.isMoorning = false : customer.values.isMoorning = true;
 
-                                    let lineAddress = customerRecord.findSublistLineWithValue({
-                                        sublistId: 'addressbook',
-                                        fieldId: 'addressbookaddress',
-                                        value: customer.values["internalid.Address"].value
-                                    });
+                                let fieldId = arrayIds[finalDay]
+                                log.debug('fieldId', fieldId)
 
-                                    log.debug('id lineAddress', lineAddress)
-                                    customerRecord.selectLine({
-                                        sublistId: 'addressbook',
-                                        line: lineAddress
-                                    });
-
-                                    let addressSubrecord = customerRecord.getCurrentSublistSubrecord({
-                                        sublistId: 'addressbook',
-                                        fieldId: 'addressbookaddress'
-                                    });
-
-                                    let dateString = format.format({
-                                        value: new Date(new Date().setDate(new Date().getDate() + 1)),
-                                        type: format.Type.DATE,
-                                        timezone: format.Timezone.AMERICA_MEXICO_CITY
-                                    });
-                                    log.debug('dateString', dateString)
-                                    addressSubrecord.setText({
-                                        fieldId: 'custrecord_ptg_fecha_inicio_servicio',
-                                        text: dateString
-                                    });
-
-                                    customerRecord.commitLine({
-                                        sublistId: "addressbook"
-                                    });
-                                    let id = customerRecord.save();
-                                    log.debug('se actualizo', id)
-
-                                } catch (error) {
-                                    log.debug('error al actualizar la fecha', error)
-                                }
-                                return true;
-
+                                let isSunday = validSunday(new Date(new Date().setDate(new Date().getDate() + 1)), customer.values['custrecord_ptg_entrega_pedidos_domingo.CUSTENTITY_PTG_PLANTARELACIONADA_']);
+                                log.debug('isSunday Semanal', isSunday)
+                                makeService.success = true;
+                                customer.values.exceptDate = isSunday;
+                                customer.values.dateToUpdate = format.format({
+                                    value: new Date(new Date().setDate(new Date().getDate() + 1)),
+                                    type: format.Type.DATE,
+                                    timezone: format.Timezone.AMERICA_MEXICO_CITY
+                                });;
+                                customer.values.idFieldDate = fieldId;
                             }
                         }
                     }
                     break;
+
+                case "5":
+                    //Validar primero si le toca domingo y que si es la fecha de hoy para devolver la fecha del
+                    //servicio
+                    let isSunday = validSunday(new Date(), customer.values['custrecord_ptg_entrega_pedidos_domingo.CUSTENTITY_PTG_PLANTARELACIONADA_']);
+                    log.debug('isSunday', isSunday);
+                    let dayOfMounthToday = date.getDate();
+                    let dayofService = format.parse({
+                        value: dates[1],
+                        type: format.Type.DATE,
+                        timezone: format.Timezone.AMERICA_MEXICO_CITY
+                    });
+                    log.debug('dayOfMounthToday', dayOfMounthToday);
+                    log.debug('dayofService', dayofService.getDate());
+
+                    if (dayOfMounthToday == dayofService.getDate()) {
+                        makeService.success = true;
+                        customer.values.exceptDate = isSunday;
+                        customer.values.dateToUpdate = format.format({
+                            value: date,
+                            type: format.Type.DATE,
+                            timezone: format.Timezone.AMERICA_MEXICO_CITY
+                        });
+                        customer.values.idFieldDate = arrayIds[1]
+                    }
+                    break;
+
+
             }
 
+            return makeService;
+        }
+
+        const validSunday = (date, makeService) => {
+            log.debug('dayService validSunday', date);
+            //let date = new Date();
+            let week = date.getDay();
+            let day = date.getDate();
+            log.debug('week sunday', week);
+            //log.debug('day sunday', day);
+            //log.debug('makeService sunday', makeService);
+            let dayToInsert;
+            if (week == 0 && makeService == 'F') {
+                //if(makeService == 'F'){     
+                dayToInsert = format.format({
+                    value: new Date(date.setDate(date.getDate() + 1)),
+                    type: format.Type.DATE,
+                    timezone: format.Timezone.AMERICA_MEXICO_CITY
+                });
+            } else {
+                dayToInsert = format.format({
+                    value: date,
+                    type: format.Type.DATE,
+                    timezone: format.Timezone.AMERICA_MEXICO_CITY
+                });
+            }
+
+            return dayToInsert;
         }
 
         //Validar si va a tener ruta matutina o vespertina
@@ -1253,7 +1281,7 @@ define(['N/format', 'N/record', 'N/search'],
                     //Obtenemos el precio por zona
                     let priceZoneValue = (!!infoCustomer.values['custrecord_ptg_colonia_ruta.Address']) ? getPriceZone(infoCustomer.values['custrecord_ptg_colonia_ruta.Address'].value) : 0;
                     let territory = (!!infoCustomer.values['custrecord_ptg_colonia_ruta.Address']) ? getTerritory(infoCustomer.values['custrecord_ptg_colonia_ruta.Address'].value) : 0;
-                    log.debug('priceZoneValue Cilindro', priceZoneValue)                    
+                    log.debug('priceZoneValue Cilindro', priceZoneValue)
                     //Obtenemos la cantidad que tiene el articulo de cilindro
                     let itemContent = search.lookupFields({
                         type: 'item',
@@ -1270,9 +1298,9 @@ define(['N/format', 'N/record', 'N/search'],
                     opportunityCilindro.setValue('customform', 305);
                     opportunityCilindro.setValue('entity', infoCustomer.values.internalid.value);
                     opportunityCilindro.setValue('custbody_ptg_estado_pedido', (contactType == 4) ? 1 : 6);
-                    if(contactType == 2){
+                    if (contactType == 2) {
                         opportunityCilindro.setValue('custbody_ptg_estado_aviso_llamadas', 3);
-                    }                    
+                    }
                     //opportunityCilindro.setValue('probability', 75);
                     opportunityCilindro.setValue('custbody_ptg_tipo_servicio', 1);
                     opportunityCilindro.setValue('custbody_ptg_id_direccion_envio', infoCustomer.values['addressinternalid.Address']);
@@ -1285,7 +1313,7 @@ define(['N/format', 'N/record', 'N/search'],
                         opportunityCilindro.setValue('custbody_ptg_ruta_asignada', infoCustomer.values['custrecord_ptg_ruta_asignada.Address'].text);
                         opportunityCilindro.setValue('custbody_ptg_turno_equipo', 1);
                     } else {
-                        opportunityCilindro.setValue('custbody_ptg_ruta_asignada', infoCustomer.values['custrecord_ptg_ruta_asignada2.Address'].text);
+                        opportunityCilindro.setValue('custbody_ptg_ruta_asignada', (infoCustomer.values['custrecord_ptg_ruta_asignada2.Address'].text || infoCustomer.values['custrecord_ptg_ruta_asignada.Address'].text));
                         opportunityCilindro.setValue('custbody_ptg_turno_equipo', 2);
                     }
                     //Agregar la direccion de envio
@@ -1299,7 +1327,7 @@ define(['N/format', 'N/record', 'N/search'],
                     //today = today.setDate(today.getDate()+1);
                     today.setDate(today.getDate() + 1);
                     //og.debug('today add', today)
-                    opportunityCilindro.setValue('expectedclosedate', today)
+                    opportunityCilindro.setText('expectedclosedate', infoCustomer.values['exceptDate']);
 
                     //Validamos que tenga una capacidad del cilindro y que tenga configurado un precio de zona
                     if (!!itemContent['custitem_ptg_capacidadcilindro_'] && Number(priceZoneValue) > 0) {
@@ -1312,8 +1340,53 @@ define(['N/format', 'N/record', 'N/search'],
                         // let finalAmount = (Number(infoCustomer.values.custentity_ptg_cantidad_frecuente_lt_cil) * Number(itemContent['custitem_ptg_capacidadcilindro_'])) * Number(priceZoneValue);
                         // opportunityCilindro.setCurrentSublistValue({ sublistId: 'item', fieldId: 'amount', value: finalAmount });
                         opportunityCilindro.commitLine({ sublistId: 'item' });
-                        let id = opportunityCilindro.save();
-                        log.debug('se creo cilindro programada', id)
+                        let creditOk = validCredit(infoCustomer, finalRate);
+                        if ((contactType == 4 && creditOk) || contactType == 2) {
+                            let id = opportunityCilindro.save();
+                            log.debug('se creo cilindro programada', id)
+
+                        } else {
+                            log.debug('no creo', 'no creo por que el limite se paso o no es de tipo aviso')
+                        }
+                        //if (!!id) {
+                        log.debug('actualizar fecha direccion', 'fecha');
+                        let customerRecord = record.load({
+                            type: record.Type.CUSTOMER,
+                            id: infoCustomer.values.internalid.value,
+                            isDynamic: true
+                        });
+
+                        let lineAddress = customerRecord.findSublistLineWithValue({
+                            sublistId: 'addressbook',
+                            fieldId: 'addressbookaddress',
+                            value: infoCustomer.values["internalid.Address"].value
+                        });
+
+                        log.debug('id lineAddress', lineAddress)
+                        customerRecord.selectLine({
+                            sublistId: 'addressbook',
+                            line: lineAddress
+                        });
+
+                        let addressSubrecord = customerRecord.getCurrentSublistSubrecord({
+                            sublistId: 'addressbook',
+                            fieldId: 'addressbookaddress'
+                        });
+
+                        if (infoCustomer.values['idFieldDate']) {
+                            addressSubrecord.setText({
+                                fieldId: infoCustomer.values['idFieldDate'],
+                                text: infoCustomer.values['dateToUpdate']
+                            });
+                        }
+
+                        customerRecord.commitLine({
+                            sublistId: "addressbook"
+                        });
+                        let idUpdateDate = customerRecord.save();
+                        log.debug('se actualizo la fecha de la direcion', idUpdateDate)
+
+                        //}
                     }
                 }
 
@@ -1341,9 +1414,9 @@ define(['N/format', 'N/record', 'N/search'],
                     opportunityCilindro.setValue('customform', 305);
                     opportunityCilindro.setValue('entity', infoCustomer.values.internalid.value);
                     opportunityCilindro.setValue('custbody_ptg_estado_pedido', (contactType == 4) ? 1 : 6);
-                    if(contactType == 2){
+                    if (contactType == 2) {
                         opportunityCilindro.setValue('custbody_ptg_estado_aviso_llamadas', 3);
-                    } 
+                    }
                     //opportunityCilindro.setValue('probability', 75);
                     opportunityCilindro.setValue('custbody_ptg_tipo_servicio', 1);
                     opportunityCilindro.setValue('custbody_ptg_id_direccion_envio', infoCustomer.values['addressinternalid.Address']);
@@ -1356,7 +1429,7 @@ define(['N/format', 'N/record', 'N/search'],
                         opportunityCilindro.setValue('custbody_ptg_ruta_asignada', infoCustomer.values['custrecord_ptg_ruta_asignada.Address'].text);
                         opportunityCilindro.setValue('custbody_ptg_turno_equipo', 1);
                     } else {
-                        opportunityCilindro.setValue('custbody_ptg_ruta_asignada', infoCustomer.values['custrecord_ptg_ruta_asignada2.Address'].text);
+                        opportunityCilindro.setValue('custbody_ptg_ruta_asignada', (infoCustomer.values['custrecord_ptg_ruta_asignada2.Address'].text || infoCustomer.values['custrecord_ptg_ruta_asignada.Address'].text));
                         opportunityCilindro.setValue('custbody_ptg_turno_equipo', 2);
                     }
                     //Agregar la direccion de envio
@@ -1370,7 +1443,7 @@ define(['N/format', 'N/record', 'N/search'],
                     //today = today.setDate(today.getDate()+1);
                     today.setDate(today.getDate() + 1);
                     //og.debug('today add', today)
-                    opportunityCilindro.setValue('expectedclosedate', today)
+                    opportunityCilindro.setText('expectedclosedate', infoCustomer.values['exceptDate']);
 
                     //Validamos que tenga una capacidad del cilindro y que tenga configurado un precio de zona
                     if (!!itemContent['custitem_ptg_capacidadcilindro_'] && Number(priceZoneValue) > 0) {
@@ -1383,17 +1456,87 @@ define(['N/format', 'N/record', 'N/search'],
                         // let finalAmount = (Number(infoCustomer.values.custentity_ptg_cantidad_frecuente_lt_cil) * Number(itemContent['custitem_ptg_capacidadcilindro_'])) * Number(priceZoneValue);
                         // opportunityCilindro.setCurrentSublistValue({ sublistId: 'item', fieldId: 'amount', value: finalAmount });
                         opportunityCilindro.commitLine({ sublistId: 'item' });
-                        let id = opportunityCilindro.save();
-                        log.debug('se creo cilindro programada ambos', id)
+                        let creditOk = validCredit(infoCustomer, finalRate);
+                        if ((contactType == 4 && creditOk) || contactType == 2) {
+                            let id = opportunityCilindro.save();
+                            log.debug('se creo cilindro programada ambos', id)
+                        }
+
+                        //if (!!id) {
+                        log.debug('actualizar fecha direccion', 'fecha');
+                        let customerRecord = record.load({
+                            type: record.Type.CUSTOMER,
+                            id: infoCustomer.values.internalid.value,
+                            isDynamic: true
+                        });
+
+                        let lineAddress = customerRecord.findSublistLineWithValue({
+                            sublistId: 'addressbook',
+                            fieldId: 'addressbookaddress',
+                            value: infoCustomer.values["internalid.Address"].value
+                        });
+
+                        log.debug('id lineAddress', lineAddress)
+                        customerRecord.selectLine({
+                            sublistId: 'addressbook',
+                            line: lineAddress
+                        });
+
+                        let addressSubrecord = customerRecord.getCurrentSublistSubrecord({
+                            sublistId: 'addressbook',
+                            fieldId: 'addressbookaddress'
+                        });
+
+                        if (infoCustomer.values['idFieldDate']) {
+                            addressSubrecord.setText({
+                                fieldId: infoCustomer.values['idFieldDate'],
+                                text: infoCustomer.values['dateToUpdate']
+                            });
+                        }
+
+                        customerRecord.commitLine({
+                            sublistId: "addressbook"
+                        });
+                        let idUpdateDate = customerRecord.save();
+                        log.debug('se actualizo la fecha de la direcion', idUpdateDate)
+
+                        //}
                     }
                 }
 
             }
         }
 
-        //Funcion especial para los de tipo Programado, hay que validar que su limite de credito no sea mayor al agg amount
-        const validCredit = () => {
+        //Funcion especial para los de tipo Programado, validarlos creditos
+        const validCredit = (customer, total) => {
+            log.debug('valid credit', total)
+            let status = true;
+            let typeCredit = customer.values['custentity_ptg_condicion_credito'].value;
 
+            if (typeCredit == 1) {
+                status = false;
+            } else if (typeCredit == 2) {
+                let balance = customer.values['balance'];
+                let creditlimit = customer.values['creditlimit'];
+                let finalTotal = (total * 1.16) + Number(balance);
+
+                log.debug('final total', finalTotal);
+                if (finalTotal > Number(creditlimit)) {
+                    status = false;
+                }
+            } else if (typeCredit == 3) {
+                let balance = customer.values['balance'];
+                let creditlimit = customer.values['creditlimit'];
+                let balanceOver = customer.values['overduebalance']
+                let finalTotal = (total * 1.16) + Number(balance);
+                log.debug('final total', finalTotal);
+                if (finalTotal > Number(creditlimit) || balanceOver > 0) {
+                    status = false;
+                }
+            }
+
+            log.debug('status valid credit', status)
+            return status;
         }
 
         //Funcion para crear estacionario
@@ -1417,9 +1560,9 @@ define(['N/format', 'N/record', 'N/search'],
                     opportunityEstacionaria.setValue('customform', 305);
                     opportunityEstacionaria.setValue('entity', infoCustomer.values.internalid.value);
                     opportunityEstacionaria.setValue('custbody_ptg_estado_pedido', (contactType == 4) ? 1 : 6);
-                    if(contactType == 2){
+                    if (contactType == 2) {
                         opportunityEstacionaria.setValue('custbody_ptg_estado_aviso_llamadas', 3);
-                    } 
+                    }
                     //opportunityEstacionaria.setValue('probability', 75);
                     opportunityEstacionaria.setValue('custbody_ptg_tipo_servicio', 2);
                     opportunityEstacionaria.setValue('custbody_ptg_precio_articulo_zona', priceZoneValue);
@@ -1433,7 +1576,7 @@ define(['N/format', 'N/record', 'N/search'],
                         opportunityEstacionaria.setValue('custbody_ptg_ruta_asignada', infoCustomer.values['custrecord_ptg_ruta_asignada.Address'].text);
                         opportunityEstacionaria.setValue('custbody_ptg_turno_equipo', 1);
                     } else {
-                        opportunityEstacionaria.setValue('custbody_ptg_ruta_asignada', infoCustomer.values['custrecord_ptg_ruta_asignada2.Address'].text);
+                        opportunityEstacionaria.setValue('custbody_ptg_ruta_asignada', (infoCustomer.values['custrecord_ptg_ruta_asignada2.Address'].text || infoCustomer.values['custrecord_ptg_ruta_asignada.Address'].text));
                         opportunityEstacionaria.setValue('custbody_ptg_turno_equipo', 2);
                     }
                     //Agregar la direccion de envio
@@ -1447,7 +1590,7 @@ define(['N/format', 'N/record', 'N/search'],
                     //today = today.setDate(today.getDate()+1);
                     today.setDate(today.getDate() + 1);
                     //log.debug('today add', today)
-                    opportunityEstacionaria.setValue('expectedclosedate', today)
+                    opportunityEstacionaria.setText('expectedclosedate', infoCustomer.values['exceptDate']);
 
                     if (Number(priceZoneValue) > 0) {
                         //opportunityEstacionaria.insertLine({ sublistId: 'item', line: 0 });
@@ -1456,10 +1599,57 @@ define(['N/format', 'N/record', 'N/search'],
                         opportunityEstacionaria.setCurrentSublistValue({ sublistId: 'item', fieldId: 'quantity', value: Number(infoCustomer.values["custrecord_ptg_capacidad_art.Address"]) });
                         opportunityEstacionaria.setCurrentSublistValue({ sublistId: 'item', fieldId: 'rate', value: Number(priceZoneValue) });
                         // let finalAmount = Number(priceZoneValue) * Number(infoCustomer.values.custentity_ptg_cantidad_frecuente_lt_cil);
-                        // opportunityEstacionaria.setCurrentSublistValue({ sublistId: 'item', fieldId: 'amount', value: finalAmount });                                        
+                        // opportunityEstacionaria.setCurrentSublistValue({ sublistId: 'item', fieldId: 'amount', value: finalAmount });    
+                        let finalRate = Number(infoCustomer.values["custrecord_ptg_capacidad_art.Address"]) * Number(priceZoneValue)
                         opportunityEstacionaria.commitLine({ sublistId: 'item' });
-                        let id = opportunityEstacionaria.save();
-                        log.debug('se creo programado estacionaria', id)
+                        let creditOk = validCredit(infoCustomer, finalRate);
+                        if ((contactType == 4 && creditOk) || contactType == 2) {
+                            let id = opportunityEstacionaria.save();
+                            log.debug('se creo programado estacionaria', id)
+
+                        } else {
+                            log.debug('no creo', 'no creo por que el limite se paso o no es de tipo aviso')
+                        }
+
+                        //if (!!id) {
+                        log.debug('actualizar fecha direccion', 'fecha');
+                        let customerRecord = record.load({
+                            type: record.Type.CUSTOMER,
+                            id: infoCustomer.values.internalid.value,
+                            isDynamic: true
+                        });
+
+                        let lineAddress = customerRecord.findSublistLineWithValue({
+                            sublistId: 'addressbook',
+                            fieldId: 'addressbookaddress',
+                            value: infoCustomer.values["internalid.Address"].value
+                        });
+
+                        log.debug('id lineAddress', lineAddress)
+                        customerRecord.selectLine({
+                            sublistId: 'addressbook',
+                            line: lineAddress
+                        });
+
+                        let addressSubrecord = customerRecord.getCurrentSublistSubrecord({
+                            sublistId: 'addressbook',
+                            fieldId: 'addressbookaddress'
+                        });
+
+                        if (infoCustomer.values['idFieldDate']) {
+                            addressSubrecord.setText({
+                                fieldId: infoCustomer.values['idFieldDate'],
+                                text: infoCustomer.values['dateToUpdate']
+                            });
+                        }
+
+                        customerRecord.commitLine({
+                            sublistId: "addressbook"
+                        });
+                        let idUpdateDate = customerRecord.save();
+                        log.debug('se actualizo la fecha de la direcion', idUpdateDate)
+
+                        // }
                     }
                 }
 
@@ -1478,9 +1668,9 @@ define(['N/format', 'N/record', 'N/search'],
                     opportunityEstacionaria.setValue('customform', 305);
                     opportunityEstacionaria.setValue('entity', infoCustomer.values.internalid.value);
                     opportunityEstacionaria.setValue('custbody_ptg_estado_pedido', (contactType == 4) ? 1 : 6);
-                    if(contactType == 2){
+                    if (contactType == 2) {
                         opportunityEstacionaria.setValue('custbody_ptg_estado_aviso_llamadas', 3);
-                    } 
+                    }
                     //opportunityEstacionaria.setValue('probability', 75);
                     opportunityEstacionaria.setValue('custbody_ptg_tipo_servicio', 2);
                     opportunityEstacionaria.setValue('custbody_ptg_precio_articulo_zona', priceZoneValue);
@@ -1495,7 +1685,7 @@ define(['N/format', 'N/record', 'N/search'],
                         opportunityEstacionaria.setValue('custbody_ptg_ruta_asignada', infoCustomer.values['custrecord_ptg_ruta_asignada_3.Address'].text);
                         opportunityEstacionaria.setValue('custbody_ptg_turno_equipo', 1);
                     } else {
-                        opportunityEstacionaria.setValue('custbody_ptg_ruta_asignada', infoCustomer.values['custrecord_ptg_ruta_asignada_4.Address'].text);
+                        opportunityEstacionaria.setValue('custbody_ptg_ruta_asignada', (infoCustomer.values['custrecord_ptg_ruta_asignada_4.Address'].text || infoCustomer.values['custrecord_ptg_ruta_asignada_3.Address'].text));
                         opportunityEstacionaria.setValue('custbody_ptg_turno_equipo', 2);
                     }
                     //Agregar la direccion de envio
@@ -1509,7 +1699,7 @@ define(['N/format', 'N/record', 'N/search'],
                     //today = today.setDate(today.getDate()+1);
                     today.setDate(today.getDate() + 1);
                     //log.debug('today add', today)
-                    opportunityEstacionaria.setValue('expectedclosedate', today)
+                    opportunityEstacionaria.setText('expectedclosedate', infoCustomer.values['exceptDate']);
 
                     if (Number(priceZoneValue) > 0) {
                         //opportunityEstacionaria.insertLine({ sublistId: 'item', line: 0 });
@@ -1520,8 +1710,55 @@ define(['N/format', 'N/record', 'N/search'],
                         // let finalAmount = Number(priceZoneValue) * Number(infoCustomer.values.custentity_ptg_cantidad_frecuente_lt_cil);
                         // opportunityEstacionaria.setCurrentSublistValue({ sublistId: 'item', fieldId: 'amount', value: finalAmount });                                        
                         opportunityEstacionaria.commitLine({ sublistId: 'item' });
-                        let id = opportunityEstacionaria.save();
-                        log.debug('se creo programado estacionaria ambos', id)
+                        let finalRate = Number(infoCustomer.values["custrecord_ptg_capacidad_can_articulo_2.Address"]) * Number(priceZoneValue);
+                        let creditOk = validCredit(infoCustomer, finalRate);
+                        if ((contactType == 4 && creditOk) || contactType == 2) {
+                            let id = opportunityEstacionaria.save();
+                            log.debug('se creo programado estacionaria ambos', id)
+
+                        } else {
+                            log.debug('no creo', 'no creo por que el limite se paso o no es de tipo aviso')
+                        }
+
+                        //if (!!id) {
+                        log.debug('actualizar fecha direccion', 'fecha');
+                        let customerRecord = record.load({
+                            type: record.Type.CUSTOMER,
+                            id: infoCustomer.values.internalid.value,
+                            isDynamic: true
+                        });
+
+                        let lineAddress = customerRecord.findSublistLineWithValue({
+                            sublistId: 'addressbook',
+                            fieldId: 'addressbookaddress',
+                            value: infoCustomer.values["internalid.Address"].value
+                        });
+
+                        log.debug('id lineAddress', lineAddress)
+                        customerRecord.selectLine({
+                            sublistId: 'addressbook',
+                            line: lineAddress
+                        });
+
+                        let addressSubrecord = customerRecord.getCurrentSublistSubrecord({
+                            sublistId: 'addressbook',
+                            fieldId: 'addressbookaddress'
+                        });
+
+                        if (infoCustomer.values['idFieldDate']) {
+                            addressSubrecord.setText({
+                                fieldId: infoCustomer.values['idFieldDate'],
+                                text: infoCustomer.values['dateToUpdate']
+                            });
+                        }
+
+                        customerRecord.commitLine({
+                            sublistId: "addressbook"
+                        });
+                        let idUpdateDate = customerRecord.save();
+                        log.debug('se actualizo la fecha de la direcion', idUpdateDate)
+
+                        //}
                     }
                 }
             }
@@ -1532,10 +1769,12 @@ define(['N/format', 'N/record', 'N/search'],
 
 
 
-        const validExistOp = (customer, type, address) => {
+        const validExistOp = (customer, type, address, frecuency, lessDate) => {
             log.debug('validExistOp', address)
             log.debug('test de mac')
             log.debug('type validExistOp', type)
+            log.debug('frecuency', frecuency)
+            log.debug('lessDate', lessDate)
 
             let isExiste = false;
             let filters;
@@ -1544,8 +1783,8 @@ define(['N/format', 'N/record', 'N/search'],
                     ["entity", "anyof", customer],
                     "AND",
                     ["custbody_ptg_id_direccion_envio", "is", address],
-                    "AND",
-                    ["custbody_ptg_estado_pedido", "noneof", "5", "3"]
+                    //"AND",
+                    //["custbody_ptg_estado_pedido", "noneof", "5", "3"]
                     // "AND",
                     // ["date", "within", "today"],
                     // "OR",
@@ -1557,8 +1796,10 @@ define(['N/format', 'N/record', 'N/search'],
             } else if (type == 4) {
                 filters = [
                     ["entity", "anyof", customer],
+                    //"AND",
+                    //["custbody_ptg_estado_pedido", "noneof", "5", "3"],
                     "AND",
-                    ["custbody_ptg_estado_pedido", "noneof", "5", "3"]
+                    ["custbody_ptg_id_direccion_envio", "is", address],
                     // "AND",
                     // // ["date", "within", "today"],
                     // // "AND",
@@ -1566,6 +1807,31 @@ define(['N/format', 'N/record', 'N/search'],
                     // "AND",
                     // ["custbody_ptg_id_direccion_envio", "is", address]
                 ]
+            }
+
+            if ((Number(frecuency) == 3 || Number(frecuency == 5) && !!lessDate)) {
+                let today = new Date();
+                let lessDates = new Date(today.setDate(today.getDate() - Number(lessDate)));
+                let todayFilter = format.format({
+                    value: new Date(),
+                    type: format.Type.DATE,
+                    timezone: format.Timezone.AMERICA_MEXICO_CITY
+                });
+
+                let lessDatesFilter = format.format({
+                    value: lessDates,
+                    type: format.Type.DATE,
+                    timezone: format.Timezone.AMERICA_MEXICO_CITY
+                });
+
+                log.debug('todayFilter', todayFilter);
+                log.debug('lessDatesFilter', lessDatesFilter);
+
+                //Cambiar el filtro del status a noneof Cancelado
+                filters.push("AND", ["date", "within", lessDatesFilter, todayFilter], "AND",
+                    ["custbody_ptg_estado_pedido", "noneof", "5"])
+            } else {
+                filters.push("AND", ["custbody_ptg_estado_pedido", "noneof", "5", "3"])
             }
 
             log.debug('filtros validaciónExistop', filters)
