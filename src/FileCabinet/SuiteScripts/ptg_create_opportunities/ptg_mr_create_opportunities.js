@@ -36,7 +36,7 @@ define(['N/format', 'N/record', 'N/search'],
                             ["stage", "anyof", "CUSTOMER"],
                             "AND",
                             ["shippingaddress.custrecord_ptg_tipo_contacto", "anyof", "2", "4"],
-                            "AND",                            
+                            "AND",
                             //["internalid", "anyof", "323002"]
                             //["internalid", "anyof", "16061"]
                             //["internalid", "anyof", "323003"]
@@ -44,9 +44,10 @@ define(['N/format', 'N/record', 'N/search'],
                             //["internalid", "anyof", "15594"]
                             //["internalid", "anyof", "323018"]
                             //["internalid", "anyof", "323019"]
-                            //["internalid", "anyof", "323020"]
-                            ["internalid", "anyof", "323002", "16061", "323003", "322143", "15594", "323018", "323019", "323020"]
-                            
+                            //["internalid", "anyof", "323020"]                            
+                            ["internalid", "anyof", "323732"] 
+                            //["internalid", "anyof", "323002", "16061", "323003", "322143", "15594", "323018", "323019", "323020"]
+
                         ],
                     columns:
                         [
@@ -327,11 +328,11 @@ define(['N/format', 'N/record', 'N/search'],
                                 join: "CUSTENTITY_PTG_PLANTARELACIONADA_",
                                 label: "PTG - RANGO DE DIAS"
                             }),
-                            search.createColumn({
-                                name: "custrecord_ptg_entrega_pedidos_domingo",
-                                join: "CUSTENTITY_PTG_PLANTARELACIONADA_",
-                                label: "PTG - ENTREGA PEDIDOS EN DOMINGO"
-                            }),
+                            // search.createColumn({
+                            //     name: "custrecord_ptg_entrega_pedidos_domingo",
+                            //     join: "CUSTENTITY_PTG_PLANTARELACIONADA_",
+                            //     label: "PTG - ENTREGA PEDIDOS EN DOMINGO"
+                            // }),
                             search.createColumn({ name: "custentity_ptg_condicion_credito", label: "PTG - CONDICION DE CREDITO" }),
                             search.createColumn({ name: "creditlimit", label: "CREDIT LIMIT" }),
                             search.createColumn({ name: "balance", label: "BALANCE" }),
@@ -424,6 +425,54 @@ define(['N/format', 'N/record', 'N/search'],
                     let lessDates = Number(infoCustomer.values["custrecord_ptg_rango_dias.CUSTENTITY_PTG_PLANTARELACIONADA_"]) || '';
                     let existOP = validExistOp(Number(customer), Number(contactType), infoCustomer.values["addressinternalid.Address"], typeFrequency, lessDates);
                     log.debug('existOP antes del switch', existOP)
+
+                    //está validacion sirve por si ha tenido un servicio anterior con respecto al de meses y mensual
+                    //por si tuvo un servicio antes de la fecha programada
+                    if (existOP.exist && existOP.isBefore) {
+                        let serviceBeforeDate = validServiceAll(infoCustomer, typeFrequency, week, dates);
+                        log.debug('serviceBeforeDate', serviceBeforeDate)
+                        log.debug('customer updated beforeDate', infoCustomer)
+
+                        log.debug('actualizar fecha direccion', 'fecha por servicio anterior');
+                        if (serviceBeforeDate.success) {
+                            let customerRecord = record.load({
+                                type: record.Type.CUSTOMER,
+                                id: infoCustomer.values.internalid.value,
+                                isDynamic: true
+                            });
+
+                            let lineAddress = customerRecord.findSublistLineWithValue({
+                                sublistId: 'addressbook',
+                                fieldId: 'addressbookaddress',
+                                value: infoCustomer.values["internalid.Address"].value
+                            });
+
+                            log.debug('id lineAddress', lineAddress)
+                            customerRecord.selectLine({
+                                sublistId: 'addressbook',
+                                line: lineAddress
+                            });
+
+                            let addressSubrecord = customerRecord.getCurrentSublistSubrecord({
+                                sublistId: 'addressbook',
+                                fieldId: 'addressbookaddress'
+                            });
+
+                            if (infoCustomer.values['idFieldDate']) {
+                                addressSubrecord.setText({
+                                    fieldId: infoCustomer.values['idFieldDate'],
+                                    text: infoCustomer.values['dateToUpdate']
+                                });
+                            }
+
+                            customerRecord.commitLine({
+                                sublistId: "addressbook"
+                            });
+                            let idUpdateDate = customerRecord.save();
+                            log.debug('se actualizo la fecha de la direcion', idUpdateDate)
+                        }
+                    }
+
                     switch (typeFrequency) {
                         //Dias
                         case "4":
@@ -437,13 +486,13 @@ define(['N/format', 'N/record', 'N/search'],
                             log.debug('customer updated', infoCustomer)
                             //Validamos el tipo de servicio si es cilindro , estacionario o mixto
                             log.debug('existOP día programado', existOP)
-                            if (!!typeService && Number(typeService.value) == 1 && makeServiceDay.success && !existOP) {
+                            if (!!typeService && Number(typeService.value) == 1 && makeServiceDay.success && !existOP.exist) {
                                 log.debug('typeService', 'clindro')
                                 makeOPCilindro(typeService.value, infoCustomer, Number(contactType));
-                            } else if (!!typeService && Number(typeService.value) == 2 && makeServiceDay.success && !existOP) {
+                            } else if (!!typeService && Number(typeService.value) == 2 && makeServiceDay.success && !existOP.exist) {
                                 log.debug('typeService', 'estacionario')
                                 makeOPEstacionario(typeService.value, infoCustomer, Number(contactType));
-                            } else if (!!typeService && Number(typeService.value) == 4 && makeServiceDay.success && !existOP) {
+                            } else if (!!typeService && Number(typeService.value) == 4 && makeServiceDay.success && !existOP.exist) {
                                 log.debug('typeService', 'ambos')
                                 makeOPCilindro(typeService.value, infoCustomer, Number(contactType));
                                 makeOPEstacionario(typeService.value, infoCustomer, Number(contactType));
@@ -462,13 +511,13 @@ define(['N/format', 'N/record', 'N/search'],
                             log.debug('customer updated', infoCustomer)
                             //Validamos el tipo de servicio si es cilindro , estacionario o mixto y que no tenga creada una oportunidad                                                                                    
                             //log.debug('existOP', existOP)
-                            if (!!typeService && Number(typeService.value) == 1 && makeServiceWeek.success && !existOP) {
+                            if (!!typeService && Number(typeService.value) == 1 && makeServiceWeek.success && !existOP.exist) {
                                 log.debug('typeService', 'clindro')
                                 makeOPCilindro(typeService.value, infoCustomer, Number(contactType));
-                            } else if (!!typeService && Number(typeService.value) == 2 && makeServiceWeek.success && !existOP) {
+                            } else if (!!typeService && Number(typeService.value) == 2 && makeServiceWeek.success && !existOP.exist) {
                                 log.debug('typeService', 'estacionario')
                                 makeOPEstacionario(typeService.value, infoCustomer, Number(contactType));
-                            } else if (!!typeService && Number(typeService.value) == 4 && makeServiceWeek.success && !existOP) {
+                            } else if (!!typeService && Number(typeService.value) == 4 && makeServiceWeek.success && !existOP.exist) {
                                 log.debug('typeService', 'ambos')
                                 makeOPCilindro(typeService.value, infoCustomer, Number(contactType));
                                 makeOPEstacionario(typeService.value, infoCustomer, Number(contactType));
@@ -487,13 +536,13 @@ define(['N/format', 'N/record', 'N/search'],
                             log.debug('customer updated', infoCustomer)
 
                             //Validamos el tipo de servicio si es cilindro , estacionario o mixto                         
-                            if (!!typeService && Number(typeService.value) == 1 && makeServiceMounth.success && !existOP) {
+                            if (!!typeService && Number(typeService.value) == 1 && makeServiceMounth.success && !existOP.exist) {
                                 log.debug('typeService', 'clindro')
                                 makeOPCilindro(typeService.value, infoCustomer, Number(contactType));
-                            } else if (!!typeService && Number(typeService.value) == 2 && makeServiceMounth.success && !existOP) {
+                            } else if (!!typeService && Number(typeService.value) == 2 && makeServiceMounth.success && !existOP.exist) {
                                 log.debug('typeService', 'estacionario')
                                 makeOPEstacionario(typeService.value, infoCustomer, Number(contactType));
-                            } else if (!!typeService && Number(typeService.value) == 4 && makeServiceMounth.success && !existOP) {
+                            } else if (!!typeService && Number(typeService.value) == 4 && makeServiceMounth.success && !existOP.exist) {
                                 log.debug('typeService', 'ambos')
                                 makeOPCilindro(typeService.value, infoCustomer, Number(contactType));
                                 makeOPEstacionario(typeService.value, infoCustomer, Number(contactType));
@@ -508,13 +557,13 @@ define(['N/format', 'N/record', 'N/search'],
                             log.debug('makeServiceMounthDay', makeServiceMounthDay)
                             log.debug('customer updated', infoCustomer)
                             //Validamos el tipo de servicio si es cilindro , estacionario o mixto                         
-                            if (!!typeService && Number(typeService.value) == 1 && makeServiceMounthDay.success && !existOP) {
+                            if (!!typeService && Number(typeService.value) == 1 && makeServiceMounthDay.success && !existOP.exist) {
                                 log.debug('typeService', 'clindro')
                                 makeOPCilindro(typeService.value, infoCustomer, Number(contactType));
-                            } else if (!!typeService && Number(typeService.value) == 2 && makeServiceMounthDay.success && !existOP) {
+                            } else if (!!typeService && Number(typeService.value) == 2 && makeServiceMounthDay.success && !existOP.exist) {
                                 log.debug('typeService', 'estacionario')
                                 makeOPEstacionario(typeService.value, infoCustomer, Number(contactType));
-                            } else if (!!typeService && Number(typeService.value) == 4 && makeServiceMounthDay.success && !existOP) {
+                            } else if (!!typeService && Number(typeService.value) == 4 && makeServiceMounthDay.success && !existOP.exist) {
                                 log.debug('typeService', 'ambos')
                                 makeOPCilindro(typeService.value, infoCustomer, Number(contactType));
                                 makeOPEstacionario(typeService.value, infoCustomer, Number(contactType));
@@ -529,13 +578,13 @@ define(['N/format', 'N/record', 'N/search'],
                             log.debug('makeServiceAtDay', makeServiceAtDay)
                             log.debug('customer updated', infoCustomer)
                             //Validamos el tipo de servicio si es cilindro , estacionario o mixto                         
-                            if (!!typeService && Number(typeService.value) == 1 && makeServiceAtDay.success && !existOP) {
+                            if (!!typeService && Number(typeService.value) == 1 && makeServiceAtDay.success && !existOP.exist) {
                                 log.debug('typeService', 'clindro')
                                 makeOPCilindro(typeService.value, infoCustomer, Number(contactType));
-                            } else if (!!typeService && Number(typeService.value) == 2 && makeServiceAtDay.success && !existOP) {
+                            } else if (!!typeService && Number(typeService.value) == 2 && makeServiceAtDay.success && !existOP.exist) {
                                 log.debug('typeService', 'estacionario')
                                 makeOPEstacionario(typeService.value, infoCustomer, Number(contactType));
-                            } else if (!!typeService && Number(typeService.value) == 4 && makeServiceAtDay.success && !existOP) {
+                            } else if (!!typeService && Number(typeService.value) == 4 && makeServiceAtDay.success && !existOP.exist) {
                                 log.debug('typeService', 'ambos')
                                 makeOPCilindro(typeService.value, infoCustomer, Number(contactType));
                                 makeOPEstacionario(typeService.value, infoCustomer, Number(contactType));
@@ -563,13 +612,13 @@ define(['N/format', 'N/record', 'N/search'],
                             log.debug('customer updated', infoCustomer)
                             //Validamos el tipo de servicio si es cilindro , estacionario o mixto
                             log.debug('existOP día aviso', existOP)
-                            if (!!typeService && Number(typeService.value) == 1 && makeServiceDay.success && !existOP) {
+                            if (!!typeService && Number(typeService.value) == 1 && makeServiceDay.success && !existOP.exist) {
                                 log.debug('typeService', 'clindro')
                                 makeOPCilindro(typeService.value, infoCustomer, Number(contactType));
-                            } else if (!!typeService && Number(typeService.value) == 2 && makeServiceDay.success && !existOP) {
+                            } else if (!!typeService && Number(typeService.value) == 2 && makeServiceDay.success && !existOP.exist) {
                                 log.debug('typeService', 'estacionario')
                                 makeOPEstacionario(typeService.value, infoCustomer, Number(contactType));
-                            } else if (!!typeService && Number(typeService.value) == 4 && makeServiceDay.success && !existOP) {
+                            } else if (!!typeService && Number(typeService.value) == 4 && makeServiceDay.success && !existOP.exist) {
                                 log.debug('typeService', 'ambos')
                                 makeOPCilindro(typeService.value, infoCustomer, Number(contactType));
                                 makeOPEstacionario(typeService.value, infoCustomer, Number(contactType));
@@ -588,13 +637,13 @@ define(['N/format', 'N/record', 'N/search'],
                             log.debug('customer updated', infoCustomer)
                             //Validamos el tipo de servicio si es cilindro , estacionario o mixto y que no tenga creada una oportunidad                                                                                    
                             //log.debug('existOP', existOP)
-                            if (!!typeService && Number(typeService.value) == 1 && makeServiceWeek.success && !existOP) {
+                            if (!!typeService && Number(typeService.value) == 1 && makeServiceWeek.success && !existOP.exist) {
                                 log.debug('typeService', 'clindro')
                                 makeOPCilindro(typeService.value, infoCustomer, Number(contactType));
-                            } else if (!!typeService && Number(typeService.value) == 2 && makeServiceWeek.success && !existOP) {
+                            } else if (!!typeService && Number(typeService.value) == 2 && makeServiceWeek.success && !existOP.exist) {
                                 log.debug('typeService', 'estacionario')
                                 makeOPEstacionario(typeService.value, infoCustomer, Number(contactType));
-                            } else if (!!typeService && Number(typeService.value) == 4 && makeServiceWeek.success && !existOP) {
+                            } else if (!!typeService && Number(typeService.value) == 4 && makeServiceWeek.success && !existOP.exist) {
                                 log.debug('typeService', 'ambos')
                                 makeOPCilindro(typeService.value, infoCustomer, Number(contactType));
                                 makeOPEstacionario(typeService.value, infoCustomer, Number(contactType));
@@ -613,13 +662,13 @@ define(['N/format', 'N/record', 'N/search'],
                             log.debug('customer updated', infoCustomer)
 
                             //Validamos el tipo de servicio si es cilindro , estacionario o mixto                         
-                            if (!!typeService && Number(typeService.value) == 1 && makeServiceMounth.success && !existOP) {
+                            if (!!typeService && Number(typeService.value) == 1 && makeServiceMounth.success && !existOP.exist) {
                                 log.debug('typeService', 'clindro')
                                 makeOPCilindro(typeService.value, infoCustomer, Number(contactType));
-                            } else if (!!typeService && Number(typeService.value) == 2 && makeServiceMounth.success && !existOP) {
+                            } else if (!!typeService && Number(typeService.value) == 2 && makeServiceMounth.success && !existOP.exist) {
                                 log.debug('typeService', 'estacionario')
                                 makeOPEstacionario(typeService.value, infoCustomer, Number(contactType));
-                            } else if (!!typeService && Number(typeService.value) == 4 && makeServiceMounth.success && !existOP) {
+                            } else if (!!typeService && Number(typeService.value) == 4 && makeServiceMounth.success && !existOP.exist) {
                                 log.debug('typeService', 'ambos')
                                 makeOPCilindro(typeService.value, infoCustomer, Number(contactType));
                                 makeOPEstacionario(typeService.value, infoCustomer, Number(contactType));
@@ -634,13 +683,13 @@ define(['N/format', 'N/record', 'N/search'],
                             log.debug('makeServiceMounthDay', makeServiceMounthDay)
                             log.debug('customer updated', infoCustomer)
                             //Validamos el tipo de servicio si es cilindro , estacionario o mixto                         
-                            if (!!typeService && Number(typeService.value) == 1 && makeServiceMounthDay.success && !existOP) {
+                            if (!!typeService && Number(typeService.value) == 1 && makeServiceMounthDay.success && !existOP.exist) {
                                 log.debug('typeService', 'clindro')
                                 makeOPCilindro(typeService.value, infoCustomer, Number(contactType));
-                            } else if (!!typeService && Number(typeService.value) == 2 && makeServiceMounthDay.success && !existOP) {
+                            } else if (!!typeService && Number(typeService.value) == 2 && makeServiceMounthDay.success && !existOP.exist) {
                                 log.debug('typeService', 'estacionario')
                                 makeOPEstacionario(typeService.value, infoCustomer, Number(contactType));
-                            } else if (!!typeService && Number(typeService.value) == 4 && makeServiceMounthDay.success && !existOP) {
+                            } else if (!!typeService && Number(typeService.value) == 4 && makeServiceMounthDay.success && !existOP.exist) {
                                 log.debug('typeService', 'ambos')
                                 makeOPCilindro(typeService.value, infoCustomer, Number(contactType));
                                 makeOPEstacionario(typeService.value, infoCustomer, Number(contactType));
@@ -655,13 +704,13 @@ define(['N/format', 'N/record', 'N/search'],
                             log.debug('makeServiceAtDay', makeServiceAtDay)
                             log.debug('customer updated', infoCustomer)
                             //Validamos el tipo de servicio si es cilindro , estacionario o mixto                         
-                            if (!!typeService && Number(typeService.value) == 1 && makeServiceAtDay.success && !existOP) {
+                            if (!!typeService && Number(typeService.value) == 1 && makeServiceAtDay.success && !existOP.exist) {
                                 log.debug('typeService', 'clindro')
                                 makeOPCilindro(typeService.value, infoCustomer, Number(contactType));
-                            } else if (!!typeService && Number(typeService.value) == 2 && makeServiceAtDay.success && !existOP) {
+                            } else if (!!typeService && Number(typeService.value) == 2 && makeServiceAtDay.success && !existOP.exist) {
                                 log.debug('typeService', 'estacionario')
                                 makeOPEstacionario(typeService.value, infoCustomer, Number(contactType));
-                            } else if (!!typeService && Number(typeService.value) == 4 && makeServiceAtDay.success && !existOP) {
+                            } else if (!!typeService && Number(typeService.value) == 4 && makeServiceAtDay.success && !existOP.exist) {
                                 log.debug('typeService', 'ambos')
                                 makeOPCilindro(typeService.value, infoCustomer, Number(contactType));
                                 makeOPEstacionario(typeService.value, infoCustomer, Number(contactType));
@@ -827,8 +876,10 @@ define(['N/format', 'N/record', 'N/search'],
                         let hour = getTimeInt(initialHour);
                         log.debug('hour', hour);
                         (hour >= 14) ? customer.values.isMoorning = false : customer.values.isMoorning = true;
-                        let isSunday = validSunday(new Date(), customer.values['custrecord_ptg_entrega_pedidos_domingo.CUSTENTITY_PTG_PLANTARELACIONADA_']);
-                        log.debug('isSunday Semanal', isSunday)
+                        //let isSunday = validSunday(new Date(), customer.values['custrecord_ptg_entrega_pedidos_domingo.CUSTENTITY_PTG_PLANTARELACIONADA_']);
+                        //log.debug('isSunday Semanal', isSunday)
+                        let isSunday = validSundayandHolidays(new Date(), customer);
+                        log.debug('validSundayandHolidays', isSunday);
                         makeService.success = true;
                         customer.values.exceptDate = isSunday;
                         customer.values.dateToUpdate = format.format({
@@ -844,8 +895,10 @@ define(['N/format', 'N/record', 'N/search'],
                         let hour = getTimeInt(initialHour);
                         log.debug('hour', hour);
                         (hour >= 14) ? customer.values.isMoorning = false : customer.values.isMoorning = true;
-                        let isSunday = validSunday(new Date(new Date().setDate(new Date().getDate() + 1)), customer.values['custrecord_ptg_entrega_pedidos_domingo.CUSTENTITY_PTG_PLANTARELACIONADA_']);
-                        log.debug('isSunday Semanal', isSunday)
+                        //let isSunday = validSunday(new Date(new Date().setDate(new Date().getDate() + 1)), customer.values['custrecord_ptg_entrega_pedidos_domingo.CUSTENTITY_PTG_PLANTARELACIONADA_']);
+                        //log.debug('isSunday Semanal', isSunday)
+                        let isSunday = validSundayandHolidays(new Date(new Date().setDate(new Date().getDate() + 1)), customer);
+                        log.debug('validSundayandHolidays', isSunday);
                         makeService.success = true;
                         customer.values.exceptDate = isSunday;
                         customer.values.dateToUpdate = format.format({
@@ -874,11 +927,15 @@ define(['N/format', 'N/record', 'N/search'],
 
                     let daysToLess = Number(customer.values['custrecord_ptg_cada.Address']);
                     log.debug('daysToLess', daysToLess);
-
-                    if (dateCustomer == (actualDate - daysToLess)) {
+                    //log.debug('resta de fechas', new Date(date.setDate(date.getDate() - daysToLess)));
+                    let dateLess = new Date(date.setDate(date.getDate() - daysToLess));
+                    log.debug('dateLess', dateLess.getDate());
+                    if (dateCustomer == dateLess.getDate()) {
                         log.debug('la fecha si cuadra la resta', 'cuadra');
-                        let isSunday = validSunday(date, customer.values['custrecord_ptg_entrega_pedidos_domingo.CUSTENTITY_PTG_PLANTARELACIONADA_']);
-                        log.debug('isSunday', isSunday);
+                        //let isSunday = validSunday(date, customer.values['custrecord_ptg_entrega_pedidos_domingo.CUSTENTITY_PTG_PLANTARELACIONADA_']);
+                        //log.debug('isSunday', isSunday);
+                        let isSunday = validSundayandHolidays(date, customer);
+                        log.debug('validSundayandHolidays', isSunday);
                         makeService.success = true;
                         customer.values.exceptDate = isSunday;
                         customer.values.dateToUpdate = format.format({
@@ -927,8 +984,10 @@ define(['N/format', 'N/record', 'N/search'],
 
                             let fieldId = arrayIds[day]
                             log.debug('fieldId', fieldId)
-                            let isSunday = validSunday(new Date(), customer.values['custrecord_ptg_entrega_pedidos_domingo.CUSTENTITY_PTG_PLANTARELACIONADA_']);
-                            log.debug('isSunday Semanal', isSunday)
+                            //let isSunday = validSunday(new Date(), customer.values['custrecord_ptg_entrega_pedidos_domingo.CUSTENTITY_PTG_PLANTARELACIONADA_']);
+                            //log.debug('isSunday Semanal', isSunday)
+                            let isSunday = validSundayandHolidays(new Date(), customer);
+                            log.debug('validSundayandHolidays Semanal', isSunday);
                             makeService.success = true;
                             customer.values.exceptDate = isSunday;
                             customer.values.dateToUpdate = format.format({
@@ -990,8 +1049,10 @@ define(['N/format', 'N/record', 'N/search'],
                             //log.debug('values update nextDate', values);
                             //log.debug('customer edited nextDate', customer)
                             log.debug('fieldId', fieldId)
-                            let isSunday = validSunday(new Date(new Date().setDate(new Date().getDate() + 1)), customer.values['custrecord_ptg_entrega_pedidos_domingo.CUSTENTITY_PTG_PLANTARELACIONADA_']);
-                            log.debug('isSunday Semanal', isSunday)
+                            //let isSunday = validSunday(new Date(new Date().setDate(new Date().getDate() + 1)), customer.values['custrecord_ptg_entrega_pedidos_domingo.CUSTENTITY_PTG_PLANTARELACIONADA_']);
+                            //log.debug('isSunday Semanal', isSunday)
+                            let isSunday = validSundayandHolidays(new Date(new Date().setDate(new Date().getDate() + 1)), customer);
+                            log.debug('validSundayandHolidays Semanal', isSunday);
                             makeService.success = true;
                             customer.values.exceptDate = isSunday;
                             customer.values.dateToUpdate = format.format({
@@ -1049,8 +1110,10 @@ define(['N/format', 'N/record', 'N/search'],
                                 let fieldId = arrayIds[dayActual]
                                 log.debug('fieldId', fieldId)
 
-                                let isSunday = validSunday(new Date(), customer.values['custrecord_ptg_entrega_pedidos_domingo.CUSTENTITY_PTG_PLANTARELACIONADA_']);
-                                log.debug('isSunday Semanal', isSunday)
+                                //let isSunday = validSunday(new Date(), customer.values['custrecord_ptg_entrega_pedidos_domingo.CUSTENTITY_PTG_PLANTARELACIONADA_']);
+                                //log.debug('isSunday Semanal', isSunday)
+                                let isSunday = validSundayandHolidays(new Date(), customer);
+                                log.debug('validSundayandHolidays semanal', isSunday);
                                 makeService.success = true;
                                 customer.values.exceptDate = isSunday;
                                 customer.values.dateToUpdate = format.format({
@@ -1073,8 +1136,10 @@ define(['N/format', 'N/record', 'N/search'],
                                 let fieldId = arrayIds[dayActual]
                                 log.debug('fieldId', fieldId)
 
-                                let isSunday = validSunday(new Date(), customer.values['custrecord_ptg_entrega_pedidos_domingo.CUSTENTITY_PTG_PLANTARELACIONADA_']);
-                                log.debug('isSunday Semanal', isSunday)
+                                //let isSunday = validSunday(new Date(), customer.values['custrecord_ptg_entrega_pedidos_domingo.CUSTENTITY_PTG_PLANTARELACIONADA_']);
+                                //log.debug('isSunday Semanal', isSunday)
+                                let isSunday = validSundayandHolidays(new Date(), customer);
+                                log.debug('validSundayandHolidays semanal', isSunday);
                                 makeService.success = true;
                                 customer.values.exceptDate = isSunday;
                                 customer.values.dateToUpdate = format.format({
@@ -1123,8 +1188,10 @@ define(['N/format', 'N/record', 'N/search'],
                                 let fieldId = arrayIds[finalDay]
                                 log.debug('fieldId', fieldId)
 
-                                let isSunday = validSunday(new Date(new Date().setDate(new Date().getDate() + 1)), customer.values['custrecord_ptg_entrega_pedidos_domingo.CUSTENTITY_PTG_PLANTARELACIONADA_']);
-                                log.debug('isSunday Semanal', isSunday)
+                                //let isSunday = validSunday(new Date(new Date().setDate(new Date().getDate() + 1)), customer.values['custrecord_ptg_entrega_pedidos_domingo.CUSTENTITY_PTG_PLANTARELACIONADA_']);
+                                //log.debug('isSunday Semanal', isSunday)
+                                let isSunday = validSundayandHolidays(new Date(new Date().setDate(new Date().getDate() + 1)), customer);
+                                log.debug('validSundayandHolidays semanal', isSunday);
                                 makeService.success = true;
                                 customer.values.exceptDate = isSunday;
                                 customer.values.dateToUpdate = format.format({
@@ -1147,8 +1214,10 @@ define(['N/format', 'N/record', 'N/search'],
                                 let fieldId = arrayIds[finalDay]
                                 log.debug('fieldId', fieldId)
 
-                                let isSunday = validSunday(new Date(new Date().setDate(new Date().getDate() + 1)), customer.values['custrecord_ptg_entrega_pedidos_domingo.CUSTENTITY_PTG_PLANTARELACIONADA_']);
-                                log.debug('isSunday Semanal', isSunday)
+                                //let isSunday = validSunday(new Date(new Date().setDate(new Date().getDate() + 1)), customer.values['custrecord_ptg_entrega_pedidos_domingo.CUSTENTITY_PTG_PLANTARELACIONADA_']);
+                                //log.debug('isSunday Semanal', isSunday)
+                                let isSunday = validSundayandHolidays(new Date(new Date().setDate(new Date().getDate() + 1)), customer);
+                                log.debug('validSundayandHolidays semanal', isSunday);
                                 makeService.success = true;
                                 customer.values.exceptDate = isSunday;
                                 customer.values.dateToUpdate = format.format({
@@ -1165,8 +1234,8 @@ define(['N/format', 'N/record', 'N/search'],
                 case "5":
                     //Validar primero si le toca domingo y que si es la fecha de hoy para devolver la fecha del
                     //servicio
-                    let isSunday = validSunday(new Date(), customer.values['custrecord_ptg_entrega_pedidos_domingo.CUSTENTITY_PTG_PLANTARELACIONADA_']);
-                    log.debug('isSunday', isSunday);
+                    let isSunday = validSundayandHolidays(new Date(), customer);
+                    log.debug('validSundayandHolidays', isSunday);
                     let dayOfMounthToday = date.getDate();
                     let dayofService = format.parse({
                         value: dates[1],
@@ -1194,22 +1263,139 @@ define(['N/format', 'N/record', 'N/search'],
             return makeService;
         }
 
-        const validSunday = (date, makeService) => {
+        const validSundayandHolidays = (date, customer) => {
             log.debug('dayService validSunday', date);
-            //let date = new Date();
+            log.debug('dayService validSunday Customer', customer);
+            let idLocation = customer.values['custentity_ptg_plantarelacionada_'].value;
+            log.debug('idLocation days to work', idLocation);
             let week = date.getDay();
             let day = date.getDate();
             log.debug('week sunday', week);
+
+            //Ahora buscamos los días de la semana que no trabajan
+            let locationSearchObj = search.create({
+                type: "location",
+                filters:
+                    [
+                        ["internalid", "anyof", idLocation]
+                    ],
+                columns:
+                    [
+                        search.createColumn({ name: "custrecord_ptg_no_labora_domingo", label: "PTG - NO LABORA EL DOMINGO" }),
+                        search.createColumn({ name: "custrecord_ptg_no_labora_lunes", label: "PTG - NO LABORA EL LUNES" }),
+                        search.createColumn({ name: "custrecord_ptg_no_labora_martes", label: "PTG - NO LABORA EL MARTES" }),
+                        search.createColumn({ name: "custrecord_ptg_no_labora_miercoles", label: "PTG - NO LABORA EL MIERCOLES" }),
+                        search.createColumn({ name: "custrecord_ptg_no_labora_jueves", label: "PTG - NO LABORA EL JUEVES" }),
+                        search.createColumn({ name: "custrecord_ptg_no_labora_viernes", label: "PTG - NO LABORA EL VIERNES" }),
+                        search.createColumn({ name: "custrecord_ptg_no_labora_sabado", label: "PTG - NO LABORA EL SABADO" })
+                    ]
+            });
+            let arrayWeek = [];
+            locationSearchObj.run().each(function (result) {
+                // .run().each has a limit of 4,000 results
+                let sunday = result.getValue({ name: "custrecord_ptg_no_labora_domingo", label: "PTG - NO LABORA EL DOMINGO" });
+                let monday = result.getValue({ name: "custrecord_ptg_no_labora_lunes", label: "PTG - NO LABORA EL LUNES" });
+                let tuesday = result.getValue({ name: "custrecord_ptg_no_labora_martes", label: "PTG - NO LABORA EL MARTES" });
+                let wednesday = result.getValue({ name: "custrecord_ptg_no_labora_miercoles", label: "PTG - NO LABORA EL MIERCOLES" });
+                let thursday = result.getValue({ name: "custrecord_ptg_no_labora_jueves", label: "PTG - NO LABORA EL JUEVES" });
+                let friday = result.getValue({ name: "custrecord_ptg_no_labora_viernes", label: "PTG - NO LABORA EL VIERNES" });
+                let saturday = result.getValue({ name: "custrecord_ptg_no_labora_sabado", label: "PTG - NO LABORA EL SABADO" });
+
+                arrayWeek.push(sunday, monday, tuesday, wednesday, thursday, friday, saturday)
+                return true;
+            });
+
+            log.debug('arrayWeek', arrayWeek)
+
+            //obtenemos las fechas que no trabajan
+            let customrecord_ptg_dias_feriados_no_laboraSearchObj = search.create({
+                type: "customrecord_ptg_dias_feriados_no_labora",
+                filters:
+                    [
+                    ],
+                columns:
+                    [
+                        search.createColumn({ name: "custrecord_ptg_dia_feriado_no_laboral", label: "PTG - DIA FERIADO NO LABORAL" })
+                    ]
+            });
+
+            let daysNotWork = [];
+            customrecord_ptg_dias_feriados_no_laboraSearchObj.run().each(function (result) {
+                // .run().each has a limit of 4,000 results
+                let days = result.getValue({ name: "custrecord_ptg_dia_feriado_no_laboral", label: "PTG - DIA FERIADO NO LABORAL" });
+                daysNotWork.push(days);
+                return true;
+            });
+
+            log.debug('daysNotWork', daysNotWork)
+            let todayWork = true;
+            for (let key in daysNotWork) {
+                let day = format.parse({
+                    value: daysNotWork[key],
+                    type: format.Type.DATE,
+                    timezone: format.Timezone.AMERICA_MEXICO_CITY
+                });
+
+                let dayNotWork = day.getDate();
+                let mounthNotWork = day.getMonth() + 1;
+                
+                if(dayNotWork == date.getDate() && mounthNotWork == (date.getMonth() + 1)){
+                    log.debug('hoy no se trabaja', date)
+                    todayWork = false;
+                }
+            }
+
+            log.debug('todayWork', todayWork);
+
+
+            let thisWeekWork = arrayWeek[week];
+            log.debug('thisWeekWork', thisWeekWork)
+
+
+
+            //let date = new Date();            
             //log.debug('day sunday', day);
             //log.debug('makeService sunday', makeService);
             let dayToInsert;
-            if (week == 0 && makeService == 'F') {
+            if (thisWeekWork || !todayWork) {
                 //if(makeService == 'F'){     
                 dayToInsert = format.format({
                     value: new Date(date.setDate(date.getDate() + 1)),
                     type: format.Type.DATE,
                     timezone: format.Timezone.AMERICA_MEXICO_CITY
                 });
+
+                log.debug('antes del if', dayToInsert)
+
+                let nextDayWork = true;
+                log.debug('getWeekOfnextDay', dayToInsert.getDay())
+                let thisNextWeekWork = arrayWeek[dayToInsert.getDay()];
+                log.debug('thisNextWeekWork', thisNextWeekWork)
+                for (let key in daysNotWork) {
+                    let day = format.parse({
+                        value: daysNotWork[key],
+                        type: format.Type.DATE,
+                        timezone: format.Timezone.AMERICA_MEXICO_CITY
+                    });    
+                    let dayNotWork = day.getDate();
+                    let mounthNotWork = day.getMonth() + 1;
+                    
+                    if(dayNotWork == dayToInsert.getDate() && mounthNotWork == (dayToInsert.getMonth() + 1)){
+                        log.debug('el dia siguiente tampoco se trabaja', dayToInsert)
+                        nextDayWork = false;
+                    }
+                }
+
+                if(thisNextWeekWork || !nextDayWork){
+                    dayToInsert = format.format({
+                        value: new Date(dayToInsert.setDate(dayToInsert.getDate() + 1)),
+                        type: format.Type.DATE,
+                        timezone: format.Timezone.AMERICA_MEXICO_CITY
+                    });
+
+                    log.debug('despues del if', dayToInsert)
+                }
+
             } else {
                 dayToInsert = format.format({
                     value: date,
@@ -1309,6 +1495,9 @@ define(['N/format', 'N/record', 'N/search'],
                     opportunityCilindro.setText('custbody_ptg_y_las', infoCustomer.values['custrecord_ptg_y_las.Address']);
                     opportunityCilindro.setValue('custbody_ptg_zonadeprecioop_', territory);
                     opportunityCilindro.setValue('custbody_ptg_planta_relacionada', infoCustomer.values['custentity_ptg_plantarelacionada_'].value);
+                    if(contactType == 4){
+                        opportunityCilindro.setValue('custbody_ptg_oportunidad_programado', true);
+                    }                    
                     if (infoCustomer.values.isMoorning) {
                         opportunityCilindro.setValue('custbody_ptg_ruta_asignada', infoCustomer.values['custrecord_ptg_ruta_asignada.Address'].text);
                         opportunityCilindro.setValue('custbody_ptg_turno_equipo', 1);
@@ -1570,7 +1759,10 @@ define(['N/format', 'N/record', 'N/search'],
                     opportunityEstacionaria.setValue('custbody_ptg_id_direccion_envio', infoCustomer.values['addressinternalid.Address']);
                     opportunityEstacionaria.setText('custbody_ptg_entre_las', infoCustomer.values['custrecord_ptg_entre_las.Address']);
                     opportunityEstacionaria.setText('custbody_ptg_y_las', infoCustomer.values['custrecord_ptg_y_las.Address']);
-                    opportunityEstacionaria.setValue('custbody_ptg_zonadeprecioop_', territory);
+                    opportunityEstacionaria.setValue('custbody_ptg_zonadeprecioop_', territory);          
+                    if(contactType == 4){
+                        opportunityEstacionaria.setValue('custbody_ptg_oportunidad_programado', true);
+                    }             
                     opportunityEstacionaria.setValue('custbody_ptg_planta_relacionada', infoCustomer.values['custentity_ptg_plantarelacionada_'].value);
                     if (infoCustomer.values.isMoorning) {
                         opportunityEstacionaria.setValue('custbody_ptg_ruta_asignada', infoCustomer.values['custrecord_ptg_ruta_asignada.Address'].text);
@@ -1776,7 +1968,10 @@ define(['N/format', 'N/record', 'N/search'],
             log.debug('frecuency', frecuency)
             log.debug('lessDate', lessDate)
 
-            let isExiste = false;
+            let isExiste = {
+                exist: false,
+                isBefore: false
+            };
             let filters;
             if (type == 2) {
                 filters = [
@@ -1828,8 +2023,9 @@ define(['N/format', 'N/record', 'N/search'],
                 log.debug('lessDatesFilter', lessDatesFilter);
 
                 //Cambiar el filtro del status a noneof Cancelado
-                filters.push("AND", ["date", "within", lessDatesFilter, todayFilter], "AND",
+                filters.push("AND", ["expectedclosedate", "within", lessDatesFilter, todayFilter], "AND",
                     ["custbody_ptg_estado_pedido", "noneof", "5"])
+                isExiste.isBefore = true;
             } else {
                 filters.push("AND", ["custbody_ptg_estado_pedido", "noneof", "5", "3"])
             }
@@ -1842,14 +2038,14 @@ define(['N/format', 'N/record', 'N/search'],
                 columns:
                     [
                         search.createColumn({ name: "internalid", label: "Internal ID" }),
-                        search.createColumn({ name: "transactionnumber", label: "Transaction Number" })
+                        //search.createColumn({ name: "transactionnumber", label: "Transaction Number" })
                     ]
             });
             let searchResultCount = opportunitySearchObj.runPaged().count;
+            log.debug('searchResultCount exist op', searchResultCount)
 
             if (searchResultCount > 0) {
-                log.debug('searchresult exist', searchResultCount);
-                isExiste = true;
+                isExiste.exist = true;
 
             }
             return isExiste
