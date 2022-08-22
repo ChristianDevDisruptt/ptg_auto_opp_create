@@ -337,6 +337,16 @@ define(['N/format', 'N/record', 'N/search'],
                             search.createColumn({ name: "creditlimit", label: "CREDIT LIMIT" }),
                             search.createColumn({ name: "balance", label: "BALANCE" }),
                             search.createColumn({ name: "overduebalance", label: "OVERDUE BALANCE" }),
+                            search.createColumn({
+                                name: "custrecord_ptg_direccion_contrato",
+                                join: "Address",
+                                label: "PTG - DIRECCION CON CONTRATO"
+                            }),
+                            search.createColumn({
+                                name: "custrecord_ptg_numero_contrato",
+                                join: "Address",
+                                label: "PTG - NUMERO DE CONTRATO"
+                            })                            
 
                         ]
                 });
@@ -1529,8 +1539,34 @@ define(['N/format', 'N/record', 'N/search'],
                         // let finalAmount = (Number(infoCustomer.values.custentity_ptg_cantidad_frecuente_lt_cil) * Number(itemContent['custitem_ptg_capacidadcilindro_'])) * Number(priceZoneValue);
                         // opportunityCilindro.setCurrentSublistValue({ sublistId: 'item', fieldId: 'amount', value: finalAmount });
                         opportunityCilindro.commitLine({ sublistId: 'item' });
-                        let creditOk = validCredit(infoCustomer, finalRate);
+                        let creditOk = validCredit(infoCustomer, (finalRate * 1.16));
                         if ((contactType == 4 && creditOk) || contactType == 2) {
+                            let objPayment = {
+                                pago : []
+                            };
+                            if(!!infoCustomer.values['custentity_ptg_alianza_comercial_cliente'].value || infoCustomer.values['custrecord_ptg_direccion_contrato.Address'] == 'T'){
+                                let objCreditContract = {};
+                                objCreditContract.metodo_txt = (infoCustomer.values['custrecord_ptg_direccion_contrato.Address'] == 'T') ? 'Contrato del cliente' : 'Crédito del cliente';
+                                objCreditContract.tipo_pago = 9;
+                                objCreditContract.tipo_cuenta = null;
+                                objCreditContract.tipo_tarjeta = null;
+                                objCreditContract.monto = finalRate * 1.16;
+                                objCreditContract.folio = (infoCustomer.values['custrecord_ptg_direccion_contrato.Address'] == 'T') ? infoCustomer.value['custrecord_ptg_numero_contrato.Address'] : '';
+                                objPayment.pago.push(objCreditContract);
+                                opportunityCilindro.setValue('custbody_ptg_opcion_pago_obj', JSON.stringify(objPayment));
+                            }else{
+                                let objEfectivo = {};
+                                objEfectivo.metodo_txt = "Efectivo";
+                                objEfectivo.tipo_pago = 1;
+                                objEfectivo.tipo_cuenta = null;
+                                objEfectivo.tipo_tarjeta = null;
+                                objEfectivo.monto = finalRate * 1.16;
+                                objEfectivo.folio = '';
+                                objPayment.pago.push(objEfectivo);
+                                opportunityCilindro.setValue('custbody_ptg_opcion_pago_obj', JSON.stringify(objPayment));
+                            }
+
+
                             let id = opportunityCilindro.save();
                             log.debug('se creo cilindro programada', id)
 
@@ -1645,8 +1681,33 @@ define(['N/format', 'N/record', 'N/search'],
                         // let finalAmount = (Number(infoCustomer.values.custentity_ptg_cantidad_frecuente_lt_cil) * Number(itemContent['custitem_ptg_capacidadcilindro_'])) * Number(priceZoneValue);
                         // opportunityCilindro.setCurrentSublistValue({ sublistId: 'item', fieldId: 'amount', value: finalAmount });
                         opportunityCilindro.commitLine({ sublistId: 'item' });
-                        let creditOk = validCredit(infoCustomer, finalRate);
+                        let creditOk = validCredit(infoCustomer, (finalRate * 1.16));
                         if ((contactType == 4 && creditOk) || contactType == 2) {
+                            let objPayment = {
+                                pago : []
+                            };
+                            if(!!infoCustomer.values['custentity_ptg_alianza_comercial_cliente'].value || infoCustomer.values['custrecord_ptg_direccion_contrato.Address'] == 'T'){
+                                let objCreditContract = {};
+                                objCreditContract.metodo_txt = (infoCustomer.values['custrecord_ptg_direccion_contrato.Address'] == 'T') ? 'Contrato del cliente' : 'Crédito del cliente';
+                                objCreditContract.tipo_pago = 9;
+                                objCreditContract.tipo_cuenta = null;
+                                objCreditContract.tipo_tarjeta = null;
+                                objCreditContract.monto = finalRate * 1.16;
+                                objCreditContract.folio = (infoCustomer.values['custrecord_ptg_direccion_contrato.Address'] == 'T') ? infoCustomer.value['custrecord_ptg_numero_contrato.Address'] : '';
+                                objPayment.pago.push(objCreditContract);
+                                opportunityCilindro.setValue('custbody_ptg_opcion_pago_obj', JSON.stringify(objPayment));
+                            }else{
+                                let objEfectivo = {};
+                                objEfectivo.metodo_txt = "Efectivo";
+                                objEfectivo.tipo_pago = 1;
+                                objEfectivo.tipo_cuenta = null;
+                                objEfectivo.tipo_tarjeta = null;
+                                objEfectivo.monto = finalRate * 1.16;
+                                objEfectivo.folio = '';
+                                objPayment.pago.push(objEfectivo);
+                                opportunityCilindro.setValue('custbody_ptg_opcion_pago_obj', JSON.stringify(objPayment));
+                            }
+
                             let id = opportunityCilindro.save();
                             log.debug('se creo cilindro programada ambos', id)
                         }
@@ -1794,8 +1855,33 @@ define(['N/format', 'N/record', 'N/search'],
                         // opportunityEstacionaria.setCurrentSublistValue({ sublistId: 'item', fieldId: 'amount', value: finalAmount });    
                         let finalRate = Number(infoCustomer.values["custrecord_ptg_capacidad_art.Address"]) * Number(priceZoneValue)
                         opportunityEstacionaria.commitLine({ sublistId: 'item' });
-                        let creditOk = validCredit(infoCustomer, finalRate);
+                        let creditOk = validCredit(infoCustomer, (finalRate * 1.16));
                         if ((contactType == 4 && creditOk) || contactType == 2) {
+                            let objPayment = {
+                                pago : []
+                            };
+                            if(!!infoCustomer.values['custentity_ptg_alianza_comercial_cliente'].value || infoCustomer.values['custrecord_ptg_direccion_contrato.Address'] == 'T'){
+                                let objCreditContract = {};
+                                objCreditContract.metodo_txt = (infoCustomer.values['custrecord_ptg_direccion_contrato.Address'] == 'T') ? 'Contrato del cliente' : 'Crédito del cliente';
+                                objCreditContract.tipo_pago = 9;
+                                objCreditContract.tipo_cuenta = null;
+                                objCreditContract.tipo_tarjeta = null;
+                                objCreditContract.monto = (finalRate * 1.16).toFixed(2);
+                                objCreditContract.folio = (infoCustomer.values['custrecord_ptg_direccion_contrato.Address'] == 'T') ? infoCustomer.value['custrecord_ptg_numero_contrato.Address'] : '';
+                                objPayment.pago.push(objCreditContract);
+                                opportunityEstacionaria.setValue('custbody_ptg_opcion_pago_obj', JSON.stringify(objPayment));
+                            }else{
+                                let objEfectivo = {};
+                                objEfectivo.metodo_txt = "Efectivo";
+                                objEfectivo.tipo_pago = 1;
+                                objEfectivo.tipo_cuenta = null;
+                                objEfectivo.tipo_tarjeta = null;
+                                objEfectivo.monto = (finalRate * 1.16).toFixed(2);
+                                objEfectivo.folio = '';
+                                objPayment.pago.push(objEfectivo);
+                                opportunityEstacionaria.setValue('custbody_ptg_opcion_pago_obj', JSON.stringify(objPayment));
+                            }
+
                             let id = opportunityEstacionaria.save();
                             log.debug('se creo programado estacionaria', id)
 
@@ -1903,8 +1989,32 @@ define(['N/format', 'N/record', 'N/search'],
                         // opportunityEstacionaria.setCurrentSublistValue({ sublistId: 'item', fieldId: 'amount', value: finalAmount });                                        
                         opportunityEstacionaria.commitLine({ sublistId: 'item' });
                         let finalRate = Number(infoCustomer.values["custrecord_ptg_capacidad_can_articulo_2.Address"]) * Number(priceZoneValue);
-                        let creditOk = validCredit(infoCustomer, finalRate);
+                        let creditOk = validCredit(infoCustomer, (finalRate * 1.16));
                         if ((contactType == 4 && creditOk) || contactType == 2) {
+                            let objPayment = {
+                                pago : []
+                            };
+                            if(!!infoCustomer.values['custentity_ptg_alianza_comercial_cliente'].value || infoCustomer.values['custrecord_ptg_direccion_contrato.Address'] == 'T'){
+                                let objCreditContract = {};
+                                objCreditContract.metodo_txt = (infoCustomer.values['custrecord_ptg_direccion_contrato.Address'] == 'T') ? 'Contrato del cliente' : 'Crédito del cliente';
+                                objCreditContract.tipo_pago = 9;
+                                objCreditContract.tipo_cuenta = null;
+                                objCreditContract.tipo_tarjeta = null;
+                                objCreditContract.monto = (finalRate * 1.16).toFixed(2);
+                                objCreditContract.folio = (infoCustomer.values['custrecord_ptg_direccion_contrato.Address'] == 'T') ? infoCustomer.value['custrecord_ptg_numero_contrato.Address'] : '';
+                                objPayment.pago.push(objCreditContract);
+                                opportunityEstacionaria.setValue('custbody_ptg_opcion_pago_obj', JSON.stringify(objPayment));
+                            }else{
+                                let objEfectivo = {};
+                                objEfectivo.metodo_txt = "Efectivo";
+                                objEfectivo.tipo_pago = 1;
+                                objEfectivo.tipo_cuenta = null;
+                                objEfectivo.tipo_tarjeta = null;
+                                objEfectivo.monto = (finalRate * 1.16).toFixed(2);
+                                objEfectivo.folio = '';
+                                objPayment.pago.push(objEfectivo);
+                                opportunityEstacionaria.setValue('custbody_ptg_opcion_pago_obj', JSON.stringify(objPayment));
+                            }
                             let id = opportunityEstacionaria.save();
                             log.debug('se creo programado estacionaria ambos', id)
 
