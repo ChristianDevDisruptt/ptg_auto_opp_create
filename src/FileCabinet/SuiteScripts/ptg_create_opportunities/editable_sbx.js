@@ -23,6 +23,7 @@ define(['N/format', 'N/record', 'N/search'],
          */
 
         const getInputData = (inputContext) => {
+            log.debug('inputContext', 'hola test')
             try {
                 //Obtener los clientes que tienen aviso o programado para generar su oportunidad
                 //test prueba nueva laptop
@@ -36,8 +37,8 @@ define(['N/format', 'N/record', 'N/search'],
                             ["stage", "anyof", "CUSTOMER"],
                             "AND",
                             ["shippingaddress.custrecord_ptg_tipo_contacto", "anyof", "2", "4"],
-                            "AND",
-                            //["internalid", "anyof", "323002"]
+                            //"AND",
+                            //["internalid", "anyof", "329657"]
                             //["internalid", "anyof", "16061"]
                             //["internalid", "anyof", "323003"]
                             //["internalid", "anyof", "322143"]                            
@@ -45,7 +46,7 @@ define(['N/format', 'N/record', 'N/search'],
                             //["internalid", "anyof", "323018"]
                             //["internalid", "anyof", "323019"]
                             //["internalid", "anyof", "323020"]                            
-                            ["internalid", "anyof", "323732"]
+                            //["internalid", "anyof", "329437"]
                             //["internalid", "anyof", "323002", "16061", "323003", "322143", "15594", "323018", "323019", "323020"]
 
                         ],
@@ -346,10 +347,13 @@ define(['N/format', 'N/record', 'N/search'],
                                 name: "custrecord_ptg_numero_contrato",
                                 join: "Address",
                                 label: "PTG - NUMERO DE CONTRATO"
-                            })
-
+                            }),
+                            search.createColumn({ name: "addresslabel", label: "Address Label" }),
+                            search.createColumn({ name: "custentity_ptg_tipo_descuento", label: "PTG - TIPO DE DESCUENTO" }),
+                            search.createColumn({ name: "custentity_ptg_descuento_asignar", label: "PTG - DESCUENTO PARA ASIGNAR ( % O $ )" })
                         ]
                 });
+
 
                 let searchResultCount = customerSearchObj.runPaged().count;
                 if (searchResultCount > 0) {
@@ -426,14 +430,14 @@ define(['N/format', 'N/record', 'N/search'],
                 //log.debug('contactType', contactType)
 
                 //Validamos que sea el tipo programado o aviso
-                if (Number(contactType) == 4 && (clienAlliance == 1 || clienAlliance == 2 || clientType == 3 || clientType == 2 || clientType == 1)) {
+                if (Number(contactType) == 4 && (clientType == 5 || clientType == 3 || clientType == 1)) {
                     log.debug('progromado', infoCustomer)
                     //Validar si es día, semana o mensual
                     let typeService = infoCustomer.values["custrecord_ptg_tipo_servicio.Address"];
                     let typeFrequency = infoCustomer.values["custrecord_ptg_periodo_contacto.Address"].value;
                     let customer = infoCustomer.values.internalid.value;
                     let lessDates = Number(infoCustomer.values["custrecord_ptg_rango_dias.CUSTENTITY_PTG_PLANTARELACIONADA_"]) || '';
-                    let existOP = validExistOp(Number(customer), Number(contactType), infoCustomer.values["internalid.Address"].value, typeFrequency, lessDates);
+                    let existOP = validExistOp(Number(customer), Number(contactType), infoCustomer.values['addressinternalid.Address'], typeFrequency, lessDates);
                     log.debug('existOP antes del switch', existOP)
 
                     //está validacion sirve por si ha tenido un servicio anterior con respecto al de meses y mensual
@@ -601,7 +605,7 @@ define(['N/format', 'N/record', 'N/search'],
                             }
 
                             break;
-                            
+
                         //Diario
                         case "6":
                             log.debug('diario', typeFrequency)
@@ -631,7 +635,7 @@ define(['N/format', 'N/record', 'N/search'],
                     let typeService = infoCustomer.values["custrecord_ptg_tipo_servicio.Address"];
                     let typeFrequency = infoCustomer.values["custrecord_ptg_periodo_contacto.Address"].value;
                     let customer = infoCustomer.values.internalid.value;
-                    let existOP = validExistOp(Number(customer), Number(contactType), infoCustomer.values["internalid.Address"].value);
+                    let existOP = validExistOp(Number(customer), Number(contactType), infoCustomer.values['addressinternalid.Address']);
                     log.debug('existOP antes del switch', existOP)
                     switch (typeFrequency) {
                         //Dias : Solo se le suman la cantidad de dìas a la fecha de ultimo día de servicio
@@ -751,7 +755,7 @@ define(['N/format', 'N/record', 'N/search'],
                             }
 
                             break;
-                            
+
                         //Diario
                         case "6":
                             log.debug('diario', typeFrequency)
@@ -909,14 +913,14 @@ define(['N/format', 'N/record', 'N/search'],
             log.debug('dayOfToday', dayOfToday);
             log.debug('weekOfToday', weekOfToday);
             let makeService = false;
-            let lastServiceDate ;
-            if(!!customer.values["custrecord_ptg_fecha_inicio_servicio.Address"]){
+            let lastServiceDate;
+            if (!!customer.values["custrecord_ptg_fecha_inicio_servicio.Address"]) {
                 lastServiceDate = format.parse({
                     value: customer.values["custrecord_ptg_fecha_inicio_servicio.Address"],
                     type: format.Type.DATE,
                     timezone: format.Timezone.AMERICA_MEXICO_CITY
                 });
-            }            
+            }
             log.debug('lastServiceDate', lastServiceDate)
             // let lastServiceDay = lastServiceDate.getDate();
             // log.debug('lastServiceDay', lastServiceDay)
@@ -948,45 +952,6 @@ define(['N/format', 'N/record', 'N/search'],
 
                     }
 
-
-                    // if (weeks.includes(day)) {
-                    //     let initialHour = customer.values['custrecord_ptg_entre_las.Address'];
-                    //     log.debug('initialhour turn', initialHour);
-                    //     let hour = getTimeInt(initialHour);
-                    //     log.debug('hour', hour);
-                    //     (hour >= 14) ? customer.values.isMoorning = false : customer.values.isMoorning = true;
-                    //     //let isSunday = validSunday(new Date(), customer.values['custrecord_ptg_entrega_pedidos_domingo.CUSTENTITY_PTG_PLANTARELACIONADA_']);
-                    //     //log.debug('isSunday Semanal', isSunday)
-                    //     let isSunday = validSundayandHolidays(new Date(), customer);
-                    //     log.debug('validSundayandHolidays', isSunday);
-                    //     makeService.success = true;
-                    //     customer.values.exceptDate = isSunday;
-                    //     customer.values.dateToUpdate = format.format({
-                    //         value: new Date(),
-                    //         type: format.Type.DATE,
-                    //         timezone: format.Timezone.AMERICA_MEXICO_CITY
-                    //     });;
-                    //     customer.values.idFieldDate = false
-                    //     //return true;
-                    // } else if (weeks.includes(day + 1)) {
-                    //     let initialHour = customer.values['custrecord_ptg_entre_las.Address'];
-                    //     log.debug('initialhour turn', initialHour);
-                    //     let hour = getTimeInt(initialHour);
-                    //     log.debug('hour', hour);
-                    //     (hour >= 14) ? customer.values.isMoorning = false : customer.values.isMoorning = true;
-                    //     //let isSunday = validSunday(new Date(new Date().setDate(new Date().getDate() + 1)), customer.values['custrecord_ptg_entrega_pedidos_domingo.CUSTENTITY_PTG_PLANTARELACIONADA_']);
-                    //     //log.debug('isSunday Semanal', isSunday)
-                    //     let isSunday = validSundayandHolidays(new Date(new Date().setDate(new Date().getDate() + 1)), customer);
-                    //     log.debug('validSundayandHolidays', isSunday);
-                    //     makeService.success = true;
-                    //     customer.values.exceptDate = isSunday;
-                    //     customer.values.dateToUpdate = format.format({
-                    //         value: new Date(new Date().setDate(new Date().getDate() + 1)),
-                    //         type: format.Type.DATE,
-                    //         timezone: format.Timezone.AMERICA_MEXICO_CITY
-                    //     });;
-                    //     customer.values.idFieldDate = false
-                    // }
                     break;
 
                 case "1":
@@ -1036,121 +1001,7 @@ define(['N/format', 'N/record', 'N/search'],
                         });;
                         customer.values.idFieldDate = 'custrecord_ptg_fecha_inicio_servicio';
 
-                    }
-                    // //let weeks = JSON.parse(customer.week);
-                    // if (weeks.includes(day)) {
-                    //     //Obtenemos la fecha del ultimo servicio por el numero de semana
-                    //     log.debug('estamos en la semana', day);
-                    //     log.debug('ultima fecha del servicio', dates[day]);
-
-                    //     let converLastDate = format.parse({
-                    //         value: dates[day],
-                    //         type: format.Type.DATE,
-                    //         timezone: format.Timezone.AMERICA_MEXICO_CITY
-                    //     });
-
-                    //     //Validamos cuantas veces por semana tenemos que hacer el servicio
-                    //     let frecuencyWeek = Number(customer.values['custrecord_ptg_cada.Address']) * 7;
-                    //     log.debug('frecuencyWeek', frecuencyWeek)
-                    //     let lastDate = converLastDate.getDate();
-                    //     log.debug('lastDate', lastDate);
-                    //     //let compareDate = nowDate.setDate(nowDate.getDate() - frecuencyWeek).getDate()
-                    //     //log.debug('plus frecuency week at date now', new Date(nowDate.setDate(nowDate.getDate() - frecuencyWeek)));
-                    //     let lessDate = new Date(nowDate.setDate(nowDate.getDate() - frecuencyWeek));
-                    //     log.debug('lessDate', lessDate);
-                    //     log.debug('lessDate date', lessDate.getDate());
-                    //     //Validamos que la diferencia de la fecha de hoy, sea igual a la fecha del ultimo servicio
-                    //     if (lessDate.getDate() == lastDate) {
-                    //         //Tienen la misma fecha y ahora toca definir la hora para saber que turno sera
-                    //         let initialHour = customer.values['custrecord_ptg_entre_las.Address'];
-                    //         log.debug('initialhour turn', initialHour);
-                    //         let hour = getTimeInt(initialHour);
-                    //         log.debug('hour', hour);
-                    //         (hour >= 14) ? customer.values.isMoorning = false : customer.values.isMoorning = true;
-
-                    //         let fieldId = arrayIds[day]
-                    //         log.debug('fieldId', fieldId)
-                    //         //let isSunday = validSunday(new Date(), customer.values['custrecord_ptg_entrega_pedidos_domingo.CUSTENTITY_PTG_PLANTARELACIONADA_']);
-                    //         //log.debug('isSunday Semanal', isSunday)
-                    //         let isSunday = validSundayandHolidays(new Date(), customer);
-                    //         log.debug('validSundayandHolidays Semanal', isSunday);
-                    //         makeService.success = true;
-                    //         customer.values.exceptDate = isSunday;
-                    //         customer.values.dateToUpdate = format.format({
-                    //             value: new Date(),
-                    //             type: format.Type.DATE,
-                    //             timezone: format.Timezone.AMERICA_MEXICO_CITY
-                    //         });;
-                    //         customer.values.idFieldDate = fieldId
-
-                    //     }
-
-                    // } else if (weeks.includes(day + 1) || weeks.includes(day - 6)) {
-                    //     //Esta validacion se hizo pensando en el dia siguiente , ya que tiene que verifcar que mañana igual pasa la semana
-                    //     //Si no puede generar el servicio, sin importar que paso la semana, ya que validar que si es 6. restarle -6
-                    //     //Para ver si el siguiente dia es domingo, si no es 6, se le aumenta 1                         
-                    //     let finalDay;
-                    //     if (day == 6) {
-                    //         finalDay = day - 6;
-                    //     } else {
-                    //         finalDay = day + 1;
-                    //     }
-
-                    //     log.debug('finalDay', finalDay);
-                    //     log.debug('ultima fecha del servicio un dia despues', dates[finalDay]);
-
-                    //     let converLastDate = format.parse({
-                    //         value: dates[finalDay],
-                    //         type: format.Type.DATE,
-                    //         timezone: format.Timezone.AMERICA_MEXICO_CITY
-                    //     });
-
-                    //     //Validamos cuantas veces por semana tenemos que hacer el servicio
-                    //     let frecuencyWeek = Number(customer.values['custrecord_ptg_cada.Address']) * 7;
-                    //     log.debug('frecuencyWeek', frecuencyWeek)
-                    //     let lastDate = converLastDate.getDate();
-                    //     log.debug('lastDate', lastDate);
-                    //     //let compareDate = nowDate.setDate(nowDate.getDate() - frecuencyWeek).getDate()
-                    //     //log.debug('plus frecuency week at date now', new Date(nowDate.setDate(nowDate.getDate() - frecuencyWeek)));
-                    //     //Hay que aumentarle una fecha a la de hoy, por que es validar contra el dia siguiente
-                    //     let nextDate = new Date(nowDate.setDate(nowDate.getDate() + 1));
-                    //     log.debug('next Date', nextDate)
-                    //     // //Ahorra si le quitamos los 7 dìas
-                    //     let nextLessDate = new Date(nextDate.setDate(nextDate.getDate() - frecuencyWeek));
-                    //     log.debug('nextLessDate', nextLessDate);
-                    //     log.debug('nextLessDate', nextLessDate.getDate());
-
-                    //     if (nextLessDate.getDate() == lastDate) {
-                    //         //Tienen la misma fecha y ahora toca definir la hora para saber que turno sera
-                    //         let initialHour = customer.values['custrecord_ptg_entre_las.Address'];
-                    //         log.debug('initialhour turn nextDate', initialHour);
-                    //         let hour = getTimeInt(initialHour);
-                    //         log.debug('hour nexDate', hour);
-                    //         (hour >= 14) ? customer.values.isMoorning = false : customer.values.isMoorning = true;
-
-                    //         //let values = {};
-                    //         let fieldId = arrayIds[finalDay]
-                    //         //values[fieldId] = nextDate;
-
-                    //         //log.debug('values update nextDate', values);
-                    //         //log.debug('customer edited nextDate', customer)
-                    //         log.debug('fieldId', fieldId)
-                    //         //let isSunday = validSunday(new Date(new Date().setDate(new Date().getDate() + 1)), customer.values['custrecord_ptg_entrega_pedidos_domingo.CUSTENTITY_PTG_PLANTARELACIONADA_']);
-                    //         //log.debug('isSunday Semanal', isSunday)
-                    //         let isSunday = validSundayandHolidays(new Date(new Date().setDate(new Date().getDate() + 1)), customer);
-                    //         log.debug('validSundayandHolidays Semanal', isSunday);
-                    //         makeService.success = true;
-                    //         customer.values.exceptDate = isSunday;
-                    //         customer.values.dateToUpdate = format.format({
-                    //             value: new Date(new Date().setDate(new Date().getDate() + 1)),
-                    //             type: format.Type.DATE,
-                    //             timezone: format.Timezone.AMERICA_MEXICO_CITY
-                    //         });;
-                    //         customer.values.idFieldDate = fieldId
-
-                    //     }
-
-                    // }
+                    }                  
 
                     break;
                 //Semana
@@ -1182,167 +1033,7 @@ define(['N/format', 'N/record', 'N/search'],
                         });;
                         customer.values.idFieldDate = 'custrecord_ptg_fecha_inicio_servicio';
                     }
-
-                    // log.debug('toca mensual', type)
-                    // //Primero validamos en que semana del mes estamos, con respecto a la fecha de hoy                    
-                    // let dateActual = date.getDate();
-                    // let dayActual = date.getDay();
-
-                    // let weekOfMonth = Math.ceil((dateActual - 1 - dayActual) / 7) + 1;
-                    // log.debug('weekOfMonth', weekOfMonth)
-
-                    // let weekOfCustomer = customer.values.inThatWeek.value;
-                    // log.debug('weekOfCustomer', weekOfCustomer)
-                    // //De igual manera validar en que semana estamos y si estamos en la correcta con respecto al cliente
-                    // if (weeks.includes(dayActual)) {
-                    //     log.debug('toca hoy', dayActual);
-
-                    //     //Validamos que ya pasara la cantidad de meses a esperar
-                    //     let monthActual = date.getMonth() + 1;
-                    //     log.debug('monthActual', monthActual)
-
-                    //     let lastMounthCustomer = format.parse({
-                    //         value: dates[dayActual],
-                    //         type: format.Type.DATE,
-                    //         timezone: format.Timezone.AMERICA_MEXICO_CITY
-                    //     });
-
-                    //     log.debug('mes del ultimo servicio', lastMounthCustomer.getMonth() + 1)
-
-                    //     //Validamos que al sumarle la frecuencia al ultimo mes sea al actual
-                    //     if ((lastMounthCustomer.getMonth() + (1 + Number(customer.values['custrecord_ptg_cada.Address']))) == monthActual) {
-                    //         //Validamos que estemos entre la semana 1 y 4                            
-                    //         if (weekOfMonth <= 5 && weekOfMonth == weekOfCustomer) {
-
-                    //             //Tienen la misma fecha y ahora toca definir la hora para saber que turno sera
-                    //             let initialHour = customer.values['custrecord_ptg_entre_las.Address'];
-                    //             log.debug('initialhour turn nextDate', initialHour);
-                    //             let hour = getTimeInt(initialHour);
-                    //             log.debug('hour nexDate', hour);
-                    //             (hour >= 14) ? customer.values.isMoorning = false : customer.values.isMoorning = true;
-
-                    //             let fieldId = arrayIds[dayActual]
-                    //             log.debug('fieldId', fieldId)
-
-                    //             //let isSunday = validSunday(new Date(), customer.values['custrecord_ptg_entrega_pedidos_domingo.CUSTENTITY_PTG_PLANTARELACIONADA_']);
-                    //             //log.debug('isSunday Semanal', isSunday)
-                    //             let isSunday = validSundayandHolidays(new Date(), customer);
-                    //             log.debug('validSundayandHolidays semanal', isSunday);
-                    //             makeService.success = true;
-                    //             customer.values.exceptDate = isSunday;
-                    //             customer.values.dateToUpdate = format.format({
-                    //                 value: new Date(),
-                    //                 type: format.Type.DATE,
-                    //                 timezone: format.Timezone.AMERICA_MEXICO_CITY
-                    //             });;
-                    //             customer.values.idFieldDate = fieldId;
-                    //         }
-
-                    //         if (weekOfMonth > 5 && weekOfCustomer == 5) {
-
-                    //             //Tienen la misma fecha y ahora toca definir la hora para saber que turno sera
-                    //             let initialHour = customer.values['custrecord_ptg_entre_las.Address'];
-                    //             log.debug('initialhour turn nextDate', initialHour);
-                    //             let hour = getTimeInt(initialHour);
-                    //             log.debug('hour nexDate', hour);
-                    //             (hour >= 14) ? customer.values.isMoorning = false : customer.values.isMoorning = true;
-
-                    //             let fieldId = arrayIds[dayActual]
-                    //             log.debug('fieldId', fieldId)
-
-                    //             //let isSunday = validSunday(new Date(), customer.values['custrecord_ptg_entrega_pedidos_domingo.CUSTENTITY_PTG_PLANTARELACIONADA_']);
-                    //             //log.debug('isSunday Semanal', isSunday)
-                    //             let isSunday = validSundayandHolidays(new Date(), customer);
-                    //             log.debug('validSundayandHolidays semanal', isSunday);
-                    //             makeService.success = true;
-                    //             customer.values.exceptDate = isSunday;
-                    //             customer.values.dateToUpdate = format.format({
-                    //                 value: new Date(),
-                    //                 type: format.Type.DATE,
-                    //                 timezone: format.Timezone.AMERICA_MEXICO_CITY
-                    //             });;
-                    //             customer.values.idFieldDate = fieldId;
-                    //         }
-                    //     }
-
-
-                    // } else if (weeks.includes(dayActual + 1) || weeks.includes(dayActual - 6)) {
-                    //     let finalDay;
-                    //     if (dayActual == 6) {
-                    //         finalDay = day - 6;
-                    //     } else {
-                    //         finalDay = day + 1;
-                    //     }
-                    //     log.debug('toca mañana', finalDay);
-                    //     //Para el caso del dia siguiente hay que validar igual si el dia de mañana entra en la semana
-                    //     //Validamos que ya pasara la cantidad de meses a esperar
-                    //     let monthActual = date.getMonth() + 1;
-                    //     log.debug('monthActual', monthActual)
-
-                    //     let lastMounthCustomer = format.parse({
-                    //         value: dates[finalDay],
-                    //         type: format.Type.DATE,
-                    //         timezone: format.Timezone.AMERICA_MEXICO_CITY
-                    //     });
-
-                    //     log.debug('mes del ultimo servicio', lastMounthCustomer.getMonth() + 1)
-
-                    //     //Validamos que al sumarle la frecuencia al ultimo mes sea al actual
-                    //     if ((lastMounthCustomer.getMonth() + (1 + Number(customer.values['custrecord_ptg_cada.Address']))) == monthActual) {
-                    //         //Validamos que estemos entre la semana 1 y 4                            
-                    //         if (weekOfMonth <= 5 && weekOfMonth == weekOfCustomer) {
-
-                    //             //Tienen la misma fecha y ahora toca definir la hora para saber que turno sera
-                    //             let initialHour = customer.values['custrecord_ptg_entre_las.Address'];
-                    //             log.debug('initialhour turn nextDate', initialHour);
-                    //             let hour = getTimeInt(initialHour);
-                    //             log.debug('hour nexDate', hour);
-                    //             (hour >= 14) ? customer.values.isMoorning = false : customer.values.isMoorning = true;
-
-                    //             let fieldId = arrayIds[finalDay]
-                    //             log.debug('fieldId', fieldId)
-
-                    //             //let isSunday = validSunday(new Date(new Date().setDate(new Date().getDate() + 1)), customer.values['custrecord_ptg_entrega_pedidos_domingo.CUSTENTITY_PTG_PLANTARELACIONADA_']);
-                    //             //log.debug('isSunday Semanal', isSunday)
-                    //             let isSunday = validSundayandHolidays(new Date(new Date().setDate(new Date().getDate() + 1)), customer);
-                    //             log.debug('validSundayandHolidays semanal', isSunday);
-                    //             makeService.success = true;
-                    //             customer.values.exceptDate = isSunday;
-                    //             customer.values.dateToUpdate = format.format({
-                    //                 value: new Date(new Date().setDate(new Date().getDate() + 1)),
-                    //                 type: format.Type.DATE,
-                    //                 timezone: format.Timezone.AMERICA_MEXICO_CITY
-                    //             });;
-                    //             customer.values.idFieldDate = fieldId;
-                    //         }
-
-                    //         if (weekOfMonth > 5 && weekOfCustomer == 5) {
-                    //             //try {
-                    //             //Tienen la misma fecha y ahora toca definir la hora para saber que turno sera
-                    //             let initialHour = customer.values['custrecord_ptg_entre_las.Address'];
-                    //             log.debug('initialhour turn nextDate', initialHour);
-                    //             let hour = getTimeInt(initialHour);
-                    //             log.debug('hour nexDate', hour);
-                    //             (hour >= 14) ? customer.values.isMoorning = false : customer.values.isMoorning = true;
-
-                    //             let fieldId = arrayIds[finalDay]
-                    //             log.debug('fieldId', fieldId)
-
-                    //             //let isSunday = validSunday(new Date(new Date().setDate(new Date().getDate() + 1)), customer.values['custrecord_ptg_entrega_pedidos_domingo.CUSTENTITY_PTG_PLANTARELACIONADA_']);
-                    //             //log.debug('isSunday Semanal', isSunday)
-                    //             let isSunday = validSundayandHolidays(new Date(new Date().setDate(new Date().getDate() + 1)), customer);
-                    //             log.debug('validSundayandHolidays semanal', isSunday);
-                    //             makeService.success = true;
-                    //             customer.values.exceptDate = isSunday;
-                    //             customer.values.dateToUpdate = format.format({
-                    //                 value: new Date(new Date().setDate(new Date().getDate() + 1)),
-                    //                 type: format.Type.DATE,
-                    //                 timezone: format.Timezone.AMERICA_MEXICO_CITY
-                    //             });;
-                    //             customer.values.idFieldDate = fieldId;
-                    //         }
-                    //     }
-                    // }
+                
                     break;
 
                 case "5":
@@ -1379,20 +1070,7 @@ define(['N/format', 'N/record', 'N/search'],
                             timezone: format.Timezone.AMERICA_MEXICO_CITY
                         });;
                         customer.values.idFieldDate = 'custrecord_ptg_fecha_inicio_servicio';
-                    } 
-                    /*else if (weeksConfigureCustomer.includes(weekOfToday + 1) || weeksConfigureCustomer.includes(weekOfToday - 6)) {
-                        log.debug('entro en la semana siguiente', weekOfToday);
-                        let isSunday = validSundayandHolidays(new Date(date.setDate(date.getDate() + 1)), customer);
-                        log.debug('validSundayandHolidays', isSunday);
-                        makeService = true;
-                        customer.values.exceptDate = isSunday;
-                        customer.values.dateToUpdate = format.format({
-                            value: date,
-                            type: format.Type.DATE,
-                            timezone: format.Timezone.AMERICA_MEXICO_CITY
-                        });;
-                        customer.values.idFieldDate = 'custrecord_ptg_fecha_inicio_servicio';
-                    }*/
+                    }                 
                     break;
 
 
@@ -1603,7 +1281,7 @@ define(['N/format', 'N/record', 'N/search'],
                 //Nota: Se va a cambiar al final el tipo de articulo a nivel de dirección
                 if (!!infoCustomer.values['custrecord_ptg_articulo_frecuente.Address']) {
                     //Obtenemos el precio por zona
-                    let priceZoneValue = (!!infoCustomer.values['custrecord_ptg_colonia_ruta.Address']) ? getPriceZone(infoCustomer.values['custrecord_ptg_colonia_ruta.Address'].value) : 0;
+                    let priceZoneValue = (!!infoCustomer.values['custrecord_ptg_colonia_ruta.Address']) ? getPriceZone(infoCustomer.values['custrecord_ptg_colonia_ruta.Address'].value, Number(typeService)) : 0;
                     let territory = (!!infoCustomer.values['custrecord_ptg_colonia_ruta.Address']) ? getTerritory(infoCustomer.values['custrecord_ptg_colonia_ruta.Address'].value) : 0;
                     log.debug('priceZoneValue Cilindro', priceZoneValue)
                     //Obtenemos la cantidad que tiene el articulo de cilindro
@@ -1619,7 +1297,7 @@ define(['N/format', 'N/record', 'N/search'],
                         isDynamic: true
                     });
 
-                    opportunityCilindro.setValue('customform', 265);
+                    opportunityCilindro.setValue('customform', 305);
                     //prd 265
                     //sbx 305
                     opportunityCilindro.setValue('entity', infoCustomer.values.internalid.value);
@@ -1634,7 +1312,9 @@ define(['N/format', 'N/record', 'N/search'],
                     opportunityCilindro.setText('custbody_ptg_entre_las', infoCustomer.values['custrecord_ptg_entre_las.Address']);
                     opportunityCilindro.setText('custbody_ptg_y_las', infoCustomer.values['custrecord_ptg_y_las.Address']);
                     opportunityCilindro.setValue('custbody_ptg_zonadeprecioop_', territory);
+                    opportunityCilindro.setValue('custbody_ptg_origen_servicio', 4);                    
                     opportunityCilindro.setValue('custbody_ptg_planta_relacionada', infoCustomer.values['custentity_ptg_plantarelacionada_'].value);
+                    opportunityCilindro.setValue('custbody_ptg_etiqueta_direccion_envio', infoCustomer.values['addresslabel']);                    
                     if (contactType == 4) {
                         opportunityCilindro.setValue('custbody_ptg_oportunidad_programado', true);
                     }
@@ -1665,12 +1345,35 @@ define(['N/format', 'N/record', 'N/search'],
                         opportunityCilindro.setCurrentSublistValue({ sublistId: 'item', fieldId: 'item', value: Number(infoCustomer.values["custrecord_ptg_articulo_frecuente.Address"].value) });
                         opportunityCilindro.setCurrentSublistValue({ sublistId: 'item', fieldId: 'quantity', value: Number(infoCustomer.values["custrecord_ptg_capacidad_art.Address"]) });
                         let finalRate = Number(itemContent['custitem_ptg_capacidadcilindro_']) * Number(priceZoneValue);
-                        opportunityCilindro.setCurrentSublistValue({ sublistId: 'item', fieldId: 'rate', value: finalRate });
+                        opportunityCilindro.setCurrentSublistValue({ sublistId: 'item', fieldId: 'rate', value: finalRate.toFixed(6) });
                         // let finalAmount = (Number(infoCustomer.values.custentity_ptg_cantidad_frecuente_lt_cil) * Number(itemContent['custitem_ptg_capacidadcilindro_'])) * Number(priceZoneValue);
                         // opportunityCilindro.setCurrentSublistValue({ sublistId: 'item', fieldId: 'amount', value: finalAmount });
-                        opportunityCilindro.commitLine({ sublistId: 'item' });
-                        let creditOk = validCredit(infoCustomer, (finalRate * 1.16));
-                        if ((contactType == 4 && creditOk) || contactType == 2) {
+                        opportunityCilindro.commitLine({ sublistId: 'item' });                        
+                        let totalTransaction = (finalRate * Number(infoCustomer.values["custrecord_ptg_capacidad_art.Address"])) * 1.16;
+                        //Agregamos linea de descuento
+                        if(!!infoCustomer.values['custentity_ptg_tipo_descuento'] && !!infoCustomer.values['custentity_ptg_tipo_descuento'].value){
+                            let factorConversion = getFactorConversion(infoCustomer.values['custrecord_ptg_colonia_ruta.Address'].value) || '';
+                            if(!!factorConversion){
+                                log.debug('cantidad de cilindro', Number(infoCustomer.values["custrecord_ptg_capacidad_art.Address"]));
+                                log.debug('total transaction', totalTransaction)
+                                let totalCilindro = (Number(itemContent['custitem_ptg_capacidadcilindro_']) * Number(infoCustomer.values["custrecord_ptg_capacidad_art.Address"])) / factorConversion; 
+                                let finalDiscount = (totalCilindro * Number(infoCustomer.values['custentity_ptg_descuento_asignar'])) / 1.16;
+                                opportunityCilindro.selectNewLine({ sublistId: 'item' });
+                                opportunityCilindro.setCurrentSublistValue({ sublistId: 'item', fieldId: 'item', value: 4528 });//prd 4217                                                                                             
+                                opportunityCilindro.setCurrentSublistValue({ sublistId: 'item', fieldId: 'rate', value: (finalDiscount * -1).toFixed(6) });                                
+                                opportunityCilindro.commitLine({ sublistId: 'item' });   
+                                log.debug('final Discount con iva', (finalDiscount * 1.16));
+                                totalTransaction -= (finalDiscount * 1.16)
+                            }                                                        
+                        }
+                        //
+                        let isOkCreditOrContract;
+                        if (infoCustomer.values['custrecord_ptg_direccion_contrato.Address'] == 'T') {
+                            isOkCreditOrContract = validContract(infoCustomer, totalTransaction);
+                        } else {
+                            isOkCreditOrContract = validCredit(infoCustomer, totalTransaction);
+                        }
+                        if ((contactType == 4 && isOkCreditOrContract) || contactType == 2) {
                             let objPayment = {
                                 pago: []
                             };
@@ -1680,8 +1383,9 @@ define(['N/format', 'N/record', 'N/search'],
                                 objCreditContract.tipo_pago = 9;
                                 objCreditContract.tipo_cuenta = null;
                                 objCreditContract.tipo_tarjeta = null;
-                                objCreditContract.monto = (finalRate * 1.16).toFixed(6);
-                                objCreditContract.folio = (infoCustomer.values['custrecord_ptg_direccion_contrato.Address'] == 'T') ? infoCustomer.value['custrecord_ptg_numero_contrato.Address'] : '';
+                                objCreditContract.monto = totalTransaction.toFixed(6);
+                                objCreditContract.monto_inicial = totalTransaction.toFixed(6);
+                                objCreditContract.folio = (infoCustomer.values['custrecord_ptg_direccion_contrato.Address'] == 'T') ? infoCustomer.values['custrecord_ptg_numero_contrato.Address'] : '';
                                 objPayment.pago.push(objCreditContract);
                                 opportunityCilindro.setValue('custbody_ptg_opcion_pago_obj', JSON.stringify(objPayment));
                             } else {
@@ -1690,7 +1394,8 @@ define(['N/format', 'N/record', 'N/search'],
                                 objEfectivo.tipo_pago = 1;
                                 objEfectivo.tipo_cuenta = null;
                                 objEfectivo.tipo_tarjeta = null;
-                                objEfectivo.monto =  (finalRate * 1.16).toFixed(6);
+                                objEfectivo.monto = totalTransaction.toFixed(6);
+                                objEfectivo.monto_inicial = totalTransaction.toFixed(6);
                                 objEfectivo.folio = '';
                                 objPayment.pago.push(objEfectivo);
                                 opportunityCilindro.setValue('custbody_ptg_opcion_pago_obj', JSON.stringify(objPayment));
@@ -1766,7 +1471,7 @@ define(['N/format', 'N/record', 'N/search'],
                         isDynamic: true
                     });
 
-                    opportunityCilindro.setValue('customform', 265);
+                    opportunityCilindro.setValue('customform', 305);
                     opportunityCilindro.setValue('entity', infoCustomer.values.internalid.value);
                     opportunityCilindro.setValue('custbody_ptg_estado_pedido', (contactType == 4) ? 1 : 6);
                     if (contactType == 2) {
@@ -1779,7 +1484,9 @@ define(['N/format', 'N/record', 'N/search'],
                     opportunityCilindro.setText('custbody_ptg_entre_las', infoCustomer.values['custrecord_ptg_entre_las.Address']);
                     opportunityCilindro.setText('custbody_ptg_y_las', infoCustomer.values['custrecord_ptg_y_las.Address']);
                     opportunityCilindro.setValue('custbody_ptg_zonadeprecioop_', territory);
+                    opportunityCilindro.setValue('custbody_ptg_origen_servicio', 4);                    
                     opportunityCilindro.setValue('custbody_ptg_planta_relacionada', infoCustomer.values['custentity_ptg_plantarelacionada_'].value);
+                    opportunityCilindro.setValue('custbody_ptg_etiqueta_direccion_envio', infoCustomer.values['addresslabel']);   
                     if (infoCustomer.values.isMoorning) {
                         opportunityCilindro.setValue('custbody_ptg_ruta_asignada', infoCustomer.values['custrecord_ptg_ruta_asignada.Address'].text);
                         opportunityCilindro.setValue('custbody_ptg_turno_equipo', 1);
@@ -1807,12 +1514,35 @@ define(['N/format', 'N/record', 'N/search'],
                         opportunityCilindro.setCurrentSublistValue({ sublistId: 'item', fieldId: 'item', value: Number(infoCustomer.values["custrecord_ptg_articulo_frecuente.Address"].value) });
                         opportunityCilindro.setCurrentSublistValue({ sublistId: 'item', fieldId: 'quantity', value: Number(infoCustomer.values["custrecord_ptg_capacidad_art.Address"]) });
                         let finalRate = Number(itemContent['custitem_ptg_capacidadcilindro_']) * Number(priceZoneValue);
-                        opportunityCilindro.setCurrentSublistValue({ sublistId: 'item', fieldId: 'rate', value: finalRate });
+                        opportunityCilindro.setCurrentSublistValue({ sublistId: 'item', fieldId: 'rate', value: finalRate.toFixed(6) });
                         // let finalAmount = (Number(infoCustomer.values.custentity_ptg_cantidad_frecuente_lt_cil) * Number(itemContent['custitem_ptg_capacidadcilindro_'])) * Number(priceZoneValue);
                         // opportunityCilindro.setCurrentSublistValue({ sublistId: 'item', fieldId: 'amount', value: finalAmount });
                         opportunityCilindro.commitLine({ sublistId: 'item' });
-                        let creditOk = validCredit(infoCustomer, (finalRate * 1.16));
-                        if ((contactType == 4 && creditOk) || contactType == 2) {
+                        let totalTransaction = (finalRate * Number(infoCustomer.values["custrecord_ptg_capacidad_art.Address"])) * 1.16;
+                        //Agregamos linea de descuento
+                        if(!!infoCustomer.values['custentity_ptg_tipo_descuento'] && !!infoCustomer.values['custentity_ptg_tipo_descuento'].value){
+                            let factorConversion = getFactorConversion(infoCustomer.values['custrecord_ptg_colonia_ruta.Address'].value) || '';
+                            if(!!factorConversion){
+                                log.debug('cantidad de cilindro', Number(infoCustomer.values["custrecord_ptg_capacidad_art.Address"]));
+                                log.debug('total transaction', totalTransaction)
+                                let totalCilindro = (Number(itemContent['custitem_ptg_capacidadcilindro_']) * Number(infoCustomer.values["custrecord_ptg_capacidad_art.Address"])) / factorConversion; 
+                                let finalDiscount = (totalCilindro * Number(infoCustomer.values['custentity_ptg_descuento_asignar'])) / 1.16;
+                                opportunityCilindro.selectNewLine({ sublistId: 'item' });
+                                opportunityCilindro.setCurrentSublistValue({ sublistId: 'item', fieldId: 'item', value: 4528 });//prd 4217                                                                
+                                opportunityCilindro.setCurrentSublistValue({ sublistId: 'item', fieldId: 'rate', value: (finalDiscount * -1).toFixed(6) });                                
+                                opportunityCilindro.commitLine({ sublistId: 'item' });                                                                   
+                                log.debug('final Discount con iva', (finalDiscount * 1.16));
+                                totalTransaction -= (finalDiscount * 1.16)
+                            }                                                        
+                        }
+                        //
+                        let isOkCreditOrContract;
+                        if (infoCustomer.values['custrecord_ptg_direccion_contrato.Address'] == 'T') {
+                            isOkCreditOrContract = validContract(infoCustomer, totalTransaction);
+                        } else {
+                            isOkCreditOrContract = validCredit(infoCustomer, totalTransaction);
+                        }
+                        if ((contactType == 4 && isOkCreditOrContract) || contactType == 2) {
                             let objPayment = {
                                 pago: []
                             };
@@ -1822,8 +1552,9 @@ define(['N/format', 'N/record', 'N/search'],
                                 objCreditContract.tipo_pago = 9;
                                 objCreditContract.tipo_cuenta = null;
                                 objCreditContract.tipo_tarjeta = null;
-                                objCreditContract.monto = (finalRate * 1.16).toFixed(6);
-                                objCreditContract.folio = (infoCustomer.values['custrecord_ptg_direccion_contrato.Address'] == 'T') ? infoCustomer.value['custrecord_ptg_numero_contrato.Address'] : '';
+                                objCreditContract.monto = totalTransaction.toFixed(6);
+                                objCreditContract.monto_inicial = totalTransaction.toFixed(6);
+                                objCreditContract.folio = (infoCustomer.values['custrecord_ptg_direccion_contrato.Address'] == 'T') ? infoCustomer.values['custrecord_ptg_numero_contrato.Address'] : '';
                                 objPayment.pago.push(objCreditContract);
                                 opportunityCilindro.setValue('custbody_ptg_opcion_pago_obj', JSON.stringify(objPayment));
                             } else {
@@ -1832,7 +1563,8 @@ define(['N/format', 'N/record', 'N/search'],
                                 objEfectivo.tipo_pago = 1;
                                 objEfectivo.tipo_cuenta = null;
                                 objEfectivo.tipo_tarjeta = null;
-                                objEfectivo.monto = (finalRate * 1.16).toFixed(6);
+                                objEfectivo.monto = totalTransaction.toFixed(6);
+                                objEfectivo.monto_inicial = totalTransaction.toFixed(6);
                                 objEfectivo.folio = '';
                                 objPayment.pago.push(objEfectivo);
                                 opportunityCilindro.setValue('custbody_ptg_opcion_pago_obj', JSON.stringify(objPayment));
@@ -1891,7 +1623,7 @@ define(['N/format', 'N/record', 'N/search'],
         const validCredit = (customer, total) => {
             log.debug('valid credit', total)
             let status = true;
-            let typeCredit = customer.values['custentity_ptg_condicion_credito'].value || "";
+            let typeCredit = Number(customer.values['custentity_ptg_condicion_credito'].value) || 0;
 
             if (typeCredit == 1) {
                 status = false;
@@ -1919,6 +1651,27 @@ define(['N/format', 'N/record', 'N/search'],
             return status;
         }
 
+        //Funcion para validar si tiene contrato
+        const validContract = (customer, total) => {
+            let status = true;
+            let isContract = customer.values['custrecord_ptg_direccion_contrato.Address'];
+
+            if (isContract == 'T' || isContract == true) {
+                let balance = Number(customer.values['balance']).toFixed(2) || 0;
+                let creditlimit = Number(customer.values['creditlimit']).toFixed(2) || 0;
+                let pendingTotal = (balance < 0) ? creditlimit : creditlimit - balance;
+                log.debug('total contract', total);
+                log.debug('pendingTotal contract', pendingTotal);
+
+                if (Number(total) > Number(pendingTotal)) {
+                    status = false;
+                }
+            }
+            log.debug('status validContract', status)
+
+            return status;
+        }
+
         //Funcion para crear estacionario
         const makeOPEstacionario = (typeService, infoCustomer, contactType) => {
             log.debug('makeOPEstacionario', 'entro')
@@ -1930,14 +1683,14 @@ define(['N/format', 'N/record', 'N/search'],
             if ((contactType == 4 || contactType == 2) && Number(typeService) == 2) {
                 //Mismo proceso que cilindro pero ahora con estacionario y la diferencia de momento es que no tiene configurado una capacidad por el tipo de articulo
                 if (!!infoCustomer.values['custrecord_ptg_articulo_frecuente.Address']) {
-                    let priceZoneValue = (!!infoCustomer.values['custrecord_ptg_colonia_ruta.Address']) ? getPriceZone(infoCustomer.values['custrecord_ptg_colonia_ruta.Address'].value) : 0;
+                    let priceZoneValue = (!!infoCustomer.values['custrecord_ptg_colonia_ruta.Address']) ? getPriceZone(infoCustomer.values['custrecord_ptg_colonia_ruta.Address'].value, Number(typeService)) : 0;
                     let territory = (!!infoCustomer.values['custrecord_ptg_colonia_ruta.Address']) ? getTerritory(infoCustomer.values['custrecord_ptg_colonia_ruta.Address'].value) : 0;
                     let opportunityEstacionaria = record.create({
                         type: record.Type.OPPORTUNITY,
                         isDynamic: true
                     });
 
-                    opportunityEstacionaria.setValue('customform', 265);
+                    opportunityEstacionaria.setValue('customform', 305);
                     opportunityEstacionaria.setValue('entity', infoCustomer.values.internalid.value);
                     opportunityEstacionaria.setValue('custbody_ptg_estado_pedido', (contactType == 4) ? 1 : 6);
                     if (contactType == 2) {
@@ -1951,6 +1704,8 @@ define(['N/format', 'N/record', 'N/search'],
                     opportunityEstacionaria.setText('custbody_ptg_entre_las', infoCustomer.values['custrecord_ptg_entre_las.Address']);
                     opportunityEstacionaria.setText('custbody_ptg_y_las', infoCustomer.values['custrecord_ptg_y_las.Address']);
                     opportunityEstacionaria.setValue('custbody_ptg_zonadeprecioop_', territory);
+                    opportunityEstacionaria.setValue('custbody_ptg_origen_servicio', 4);                    
+                    opportunityEstacionaria.setValue('custbody_ptg_etiqueta_direccion_envio', infoCustomer.values['addresslabel']);   
                     if (contactType == 4) {
                         opportunityEstacionaria.setValue('custbody_ptg_oportunidad_programado', true);
                     }
@@ -1985,8 +1740,28 @@ define(['N/format', 'N/record', 'N/search'],
                         // opportunityEstacionaria.setCurrentSublistValue({ sublistId: 'item', fieldId: 'amount', value: finalAmount });    
                         let finalRate = Number(infoCustomer.values["custrecord_ptg_capacidad_art.Address"]) * Number(priceZoneValue)
                         opportunityEstacionaria.commitLine({ sublistId: 'item' });
-                        let creditOk = validCredit(infoCustomer, (finalRate * 1.16));
-                        if ((contactType == 4 && creditOk) || contactType == 2) {
+                        //Agregamos linea de descuento
+                        let totalTransaction = finalRate * 1.16;
+                        if(!!infoCustomer.values['custentity_ptg_tipo_descuento'] && !!infoCustomer.values['custentity_ptg_tipo_descuento'].value){
+                            let factorConversion = getFactorConversion(infoCustomer.values['custrecord_ptg_colonia_ruta.Address'].value) || '';
+                            if(!!factorConversion){                               
+                                let finalDiscount = (Number(infoCustomer.values["custrecord_ptg_capacidad_art.Address"]) * Number(infoCustomer.values['custentity_ptg_descuento_asignar'])) / 1.16;
+                                opportunityEstacionaria.selectNewLine({ sublistId: 'item' });
+                                opportunityEstacionaria.setCurrentSublistValue({ sublistId: 'item', fieldId: 'item', value: 4528 });  //prd 4217                                                              
+                                opportunityEstacionaria.setCurrentSublistValue({ sublistId: 'item', fieldId: 'rate', value: (finalDiscount * -1).toFixed(6) });                                
+                                opportunityEstacionaria.commitLine({ sublistId: 'item' });   
+                                
+                                totalTransaction -= (finalDiscount * 1.16)
+                            }                                                        
+                        }
+                        //
+                        let isOkCreditOrContract;
+                        if (infoCustomer.values['custrecord_ptg_direccion_contrato.Address'] == 'T') {
+                            isOkCreditOrContract = validContract(infoCustomer, totalTransaction);
+                        } else {
+                            isOkCreditOrContract = validCredit(infoCustomer, totalTransaction);
+                        }
+                        if ((contactType == 4 && isOkCreditOrContract) || contactType == 2) {
                             let objPayment = {
                                 pago: []
                             };
@@ -1996,8 +1771,9 @@ define(['N/format', 'N/record', 'N/search'],
                                 objCreditContract.tipo_pago = 9;
                                 objCreditContract.tipo_cuenta = null;
                                 objCreditContract.tipo_tarjeta = null;
-                                objCreditContract.monto = (finalRate * 1.16).toFixed(6);
-                                objCreditContract.folio = (infoCustomer.values['custrecord_ptg_direccion_contrato.Address'] == 'T') ? infoCustomer.value['custrecord_ptg_numero_contrato.Address'] : '';
+                                objCreditContract.monto = totalTransaction.toFixed(6);
+                                objCreditContract.monto_inicial = totalTransaction.toFixed(6);
+                                objCreditContract.folio = (infoCustomer.values['custrecord_ptg_direccion_contrato.Address'] == 'T') ? infoCustomer.values['custrecord_ptg_numero_contrato.Address'] : '';
                                 objPayment.pago.push(objCreditContract);
                                 opportunityEstacionaria.setValue('custbody_ptg_opcion_pago_obj', JSON.stringify(objPayment));
                             } else {
@@ -2006,7 +1782,8 @@ define(['N/format', 'N/record', 'N/search'],
                                 objEfectivo.tipo_pago = 1;
                                 objEfectivo.tipo_cuenta = null;
                                 objEfectivo.tipo_tarjeta = null;
-                                objEfectivo.monto = (finalRate * 1.16).toFixed(6);
+                                objEfectivo.monto = totalTransaction.toFixed(6);
+                                objEfectivo.monto_inicial = totalTransaction.toFixed(6);
                                 objEfectivo.folio = '';
                                 objPayment.pago.push(objEfectivo);
                                 opportunityEstacionaria.setValue('custbody_ptg_opcion_pago_obj', JSON.stringify(objPayment));
@@ -2073,7 +1850,7 @@ define(['N/format', 'N/record', 'N/search'],
                         isDynamic: true
                     });
 
-                    opportunityEstacionaria.setValue('customform', 265);
+                    opportunityEstacionaria.setValue('customform', 305);
                     opportunityEstacionaria.setValue('entity', infoCustomer.values.internalid.value);
                     opportunityEstacionaria.setValue('custbody_ptg_estado_pedido', (contactType == 4) ? 1 : 6);
                     if (contactType == 2) {
@@ -2088,7 +1865,9 @@ define(['N/format', 'N/record', 'N/search'],
                     opportunityEstacionaria.setText('custbody_ptg_y_las', infoCustomer.values['custrecord_ptg_y_las.Address']);
                     opportunityEstacionaria.setText('custbody_ptg_y_las', infoCustomer.values['custrecord_ptg_y_las.Address']);
                     opportunityEstacionaria.setValue('custbody_ptg_zonadeprecioop_', territory);
+                    opportunityEstacionaria.setValue('custbody_ptg_origen_servicio', 4);        
                     opportunityEstacionaria.setValue('custbody_ptg_planta_relacionada', infoCustomer.values['custentity_ptg_plantarelacionada_'].value);
+                    opportunityEstacionaria.setValue('custbody_ptg_etiqueta_direccion_envio', infoCustomer.values['addresslabel']);
                     if (infoCustomer.values.isMoorning) {
                         opportunityEstacionaria.setValue('custbody_ptg_ruta_asignada', infoCustomer.values['custrecord_ptg_ruta_asignada_3.Address'].text);
                         opportunityEstacionaria.setValue('custbody_ptg_turno_equipo', 1);
@@ -2119,8 +1898,28 @@ define(['N/format', 'N/record', 'N/search'],
                         // opportunityEstacionaria.setCurrentSublistValue({ sublistId: 'item', fieldId: 'amount', value: finalAmount });                                        
                         opportunityEstacionaria.commitLine({ sublistId: 'item' });
                         let finalRate = Number(infoCustomer.values["custrecord_ptg_capacidad_can_articulo_2.Address"]) * Number(priceZoneValue);
-                        let creditOk = validCredit(infoCustomer, (finalRate * 1.16));
-                        if ((contactType == 4 && creditOk) || contactType == 2) {
+                        //Agregamos linea de descuento
+                        let totalTransaction = finalRate * 1.16;
+                        if(!!infoCustomer.values['custentity_ptg_tipo_descuento'] && !!infoCustomer.values['custentity_ptg_tipo_descuento'].value){
+                            let factorConversion = getFactorConversion(infoCustomer.values['custrecord_ptg_colonia_ruta.Address'].value) || '';
+                            if(!!factorConversion){                               
+                                let finalDiscount = (Number(infoCustomer.values["custrecord_ptg_capacidad_art.Address"]) * Number(infoCustomer.values['custentity_ptg_descuento_asignar'])) / 1.16;
+                                opportunityEstacionaria.selectNewLine({ sublistId: 'item' });
+                                opportunityEstacionaria.setCurrentSublistValue({ sublistId: 'item', fieldId: 'item', value: 4528 });  //prd 4217                                                              
+                                opportunityEstacionaria.setCurrentSublistValue({ sublistId: 'item', fieldId: 'rate', value: (finalDiscount * -1).toFixed(6) });                                
+                                opportunityEstacionaria.commitLine({ sublistId: 'item' });   
+                                
+                                totalTransaction -= (finalDiscount * 1.16)
+                            }                                                        
+                        }
+                        //
+                        let isOkCreditOrContract;
+                        if (infoCustomer.values['custrecord_ptg_direccion_contrato.Address'] == 'T') {
+                            isOkCreditOrContract = validContract(infoCustomer, totalTransaction);
+                        } else {
+                            isOkCreditOrContract = validCredit(infoCustomer, totalTransaction);
+                        }
+                        if ((contactType == 4 && isOkCreditOrContract) || contactType == 2) {
                             let objPayment = {
                                 pago: []
                             };
@@ -2130,8 +1929,9 @@ define(['N/format', 'N/record', 'N/search'],
                                 objCreditContract.tipo_pago = 9;
                                 objCreditContract.tipo_cuenta = null;
                                 objCreditContract.tipo_tarjeta = null;
-                                objCreditContract.monto = (finalRate * 1.16).toFixed(6);
-                                objCreditContract.folio = (infoCustomer.values['custrecord_ptg_direccion_contrato.Address'] == 'T') ? infoCustomer.value['custrecord_ptg_numero_contrato.Address'] : '';
+                                objCreditContract.monto = totalTransaction.toFixed(6);
+                                objCreditContract.monto_inicial = totalTransaction.toFixed(6);
+                                objCreditContract.folio = (infoCustomer.values['custrecord_ptg_direccion_contrato.Address'] == 'T') ? infoCustomer.values['custrecord_ptg_numero_contrato.Address'] : '';
                                 objPayment.pago.push(objCreditContract);
                                 opportunityEstacionaria.setValue('custbody_ptg_opcion_pago_obj', JSON.stringify(objPayment));
                             } else {
@@ -2140,7 +1940,8 @@ define(['N/format', 'N/record', 'N/search'],
                                 objEfectivo.tipo_pago = 1;
                                 objEfectivo.tipo_cuenta = null;
                                 objEfectivo.tipo_tarjeta = null;
-                                objEfectivo.monto = (finalRate * 1.16).toFixed(6);
+                                objEfectivo.monto = totalTransaction.toFixed(6);
+                                objEfectivo.monto_inicial = totalTransaction.toFixed(6);
                                 objEfectivo.folio = '';
                                 objPayment.pago.push(objEfectivo);
                                 opportunityEstacionaria.setValue('custbody_ptg_opcion_pago_obj', JSON.stringify(objPayment));
@@ -2244,7 +2045,7 @@ define(['N/format', 'N/record', 'N/search'],
                 ]
             }
 
-            if ((Number(frecuency) != 3 || Number(frecuency) != 6) && type == 4  && !!lessDate) {
+            if ((Number(frecuency) != 3 || Number(frecuency) != 6) && type == 4 && !!lessDate) {
                 let today = new Date();
                 let lessDates = new Date(today.setDate(today.getDate() - Number(lessDate)));
                 let todayFilter = format.format({
@@ -2363,7 +2164,7 @@ define(['N/format', 'N/record', 'N/search'],
 
         }
 
-        const getPriceZone = (zone) => {
+        const getPriceZone = (zone, type) => {
             log.debug('zone', zone);
             let customrecord_ptg_coloniasrutas_SearchObj = search.create({
                 type: "customrecord_ptg_coloniasrutas_",
@@ -2384,6 +2185,11 @@ define(['N/format', 'N/record', 'N/search'],
                             label: "PTG - Territorio"
                         }),
                         search.createColumn({ name: "custrecord_ptg_zona_de_precio_", label: "PTG - Zona de Precio" }),
+                        search.createColumn({
+                            name: "custrecord_ptg_precio_kg",
+                            join: "CUSTRECORD_PTG_ZONA_DE_PRECIO_",
+                            label: "PTG - PRECIO POR KG"
+                        }),
                     ]
             });
             let searchResultCount = customrecord_ptg_coloniasrutas_SearchObj.runPaged().count;
@@ -2392,15 +2198,61 @@ define(['N/format', 'N/record', 'N/search'],
                 customrecord_ptg_coloniasrutas_SearchObj.run().each(function (result) {
                     // .run().each has a limit of 4,000 results
                     log.debug('result zone', result)
-                    price = result.getValue({
-                        name: "custrecord_ptg_precio_",
-                        join: "CUSTRECORD_PTG_ZONA_DE_PRECIO_",
-                        label: "PTG - PRECIO"
-                    })
+                    if (type == 1) {
+                        price = result.getValue({
+                            name: "custrecord_ptg_precio_kg",
+                            join: "CUSTRECORD_PTG_ZONA_DE_PRECIO_",
+                            label: "PTG - PRECIO POR KG"
+                        })
+                    } else {
+                        price = result.getValue({
+                            name: "custrecord_ptg_precio_",
+                            join: "CUSTRECORD_PTG_ZONA_DE_PRECIO_",
+                            label: "PTG - PRECIO"
+                        })
+                    }
                     return true;
                 });
 
                 return price;
+            }
+
+
+        }
+
+        const getFactorConversion = (zone) => {
+            log.debug('factor conversion', zone);
+            let customrecord_ptg_coloniasrutas_SearchObj = search.create({
+                type: "customrecord_ptg_coloniasrutas_",
+                filters:
+                    [
+                        ["internalid", "anyof", zone]
+                    ],
+                columns:
+                    [
+                        search.createColumn({
+                            name: "custrecord_ptg_factor_conversion",
+                            join: "CUSTRECORD_PTG_ZONA_DE_PRECIO_",
+                            label: "PTG - FACTOR DE CONVERSION"
+                        }),
+                    ]
+            });
+            let searchResultCount = customrecord_ptg_coloniasrutas_SearchObj.runPaged().count;
+            if (searchResultCount > 0) {
+                let total;
+                customrecord_ptg_coloniasrutas_SearchObj.run().each(function (result) {
+                    // .run().each has a limit of 4,000 results
+                    log.debug('result factor', result)
+                    total = result.getValue({
+                        name: "custrecord_ptg_factor_conversion",
+                        join: "CUSTRECORD_PTG_ZONA_DE_PRECIO_",
+                        label: "PTG - FACTOR DE CONVERSION"
+                    })
+
+                    return true;
+                });
+
+                return Number(total);
             }
 
 

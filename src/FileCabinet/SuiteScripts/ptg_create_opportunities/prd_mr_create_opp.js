@@ -433,7 +433,7 @@ define(['N/format', 'N/record', 'N/search'],
                     let typeFrequency = infoCustomer.values["custrecord_ptg_periodo_contacto.Address"].value;
                     let customer = infoCustomer.values.internalid.value;
                     let lessDates = Number(infoCustomer.values["custrecord_ptg_rango_dias.CUSTENTITY_PTG_PLANTARELACIONADA_"]) || '';
-                    let existOP = validExistOp(Number(customer), Number(contactType), infoCustomer.values["internalid.Address"].value, typeFrequency, lessDates);
+                    let existOP = validExistOp(Number(customer), Number(contactType), infoCustomer.values["addressinternalid.Address"], typeFrequency, lessDates);
                     log.debug('existOP antes del switch', existOP)
 
                     //está validacion sirve por si ha tenido un servicio anterior con respecto al de meses y mensual
@@ -601,7 +601,7 @@ define(['N/format', 'N/record', 'N/search'],
                             }
 
                             break;
-                            
+
                         //Diario
                         case "6":
                             log.debug('diario', typeFrequency)
@@ -631,8 +631,7 @@ define(['N/format', 'N/record', 'N/search'],
                     let typeService = infoCustomer.values["custrecord_ptg_tipo_servicio.Address"];
                     let typeFrequency = infoCustomer.values["custrecord_ptg_periodo_contacto.Address"].value;
                     let customer = infoCustomer.values.internalid.value;
-                    let existOP = validExistOp(Number(customer), Number(contactType), infoCustomer.values["internalid.Address"].value);
-                    log.debug('existOP antes del switch', existOP)
+                    let existOP = validExistOp(Number(customer), Number(contactType), infoCustomer.values["addressinternalid.Address"]);
                     switch (typeFrequency) {
                         //Dias : Solo se le suman la cantidad de dìas a la fecha de ultimo día de servicio
                         case "1":
@@ -751,7 +750,7 @@ define(['N/format', 'N/record', 'N/search'],
                             }
 
                             break;
-                            
+
                         //Diario
                         case "6":
                             log.debug('diario', typeFrequency)
@@ -909,14 +908,11 @@ define(['N/format', 'N/record', 'N/search'],
             log.debug('dayOfToday', dayOfToday);
             log.debug('weekOfToday', weekOfToday);
             let makeService = false;
-            let lastServiceDate ;
-            if(!!customer.values["custrecord_ptg_fecha_inicio_servicio.Address"]){
-                lastServiceDate = format.parse({
-                    value: customer.values["custrecord_ptg_fecha_inicio_servicio.Address"],
-                    type: format.Type.DATE,
-                    timezone: format.Timezone.AMERICA_MEXICO_CITY
-                });
-            }            
+            let lastServiceDate = format.parse({
+                value: customer.values["custrecord_ptg_fecha_inicio_servicio.Address"],
+                type: format.Type.DATE,
+                timezone: format.Timezone.AMERICA_MEXICO_CITY
+            });
             log.debug('lastServiceDate', lastServiceDate)
             // let lastServiceDay = lastServiceDate.getDate();
             // log.debug('lastServiceDay', lastServiceDay)
@@ -1379,7 +1375,7 @@ define(['N/format', 'N/record', 'N/search'],
                             timezone: format.Timezone.AMERICA_MEXICO_CITY
                         });;
                         customer.values.idFieldDate = 'custrecord_ptg_fecha_inicio_servicio';
-                    } 
+                    }
                     /*else if (weeksConfigureCustomer.includes(weekOfToday + 1) || weeksConfigureCustomer.includes(weekOfToday - 6)) {
                         log.debug('entro en la semana siguiente', weekOfToday);
                         let isSunday = validSundayandHolidays(new Date(date.setDate(date.getDate() + 1)), customer);
@@ -1621,7 +1617,6 @@ define(['N/format', 'N/record', 'N/search'],
 
                     opportunityCilindro.setValue('customform', 265);
                     //prd 265
-                    //sbx 305
                     opportunityCilindro.setValue('entity', infoCustomer.values.internalid.value);
                     opportunityCilindro.setValue('custbody_ptg_estado_pedido', (contactType == 4) ? 1 : 6);
                     if (contactType == 2) {
@@ -1690,7 +1685,7 @@ define(['N/format', 'N/record', 'N/search'],
                                 objEfectivo.tipo_pago = 1;
                                 objEfectivo.tipo_cuenta = null;
                                 objEfectivo.tipo_tarjeta = null;
-                                objEfectivo.monto =  (finalRate * 1.16).toFixed(6);
+                                objEfectivo.monto = (finalRate * 1.16).toFixed(6);
                                 objEfectivo.folio = '';
                                 objPayment.pago.push(objEfectivo);
                                 opportunityCilindro.setValue('custbody_ptg_opcion_pago_obj', JSON.stringify(objPayment));
@@ -1891,7 +1886,7 @@ define(['N/format', 'N/record', 'N/search'],
         const validCredit = (customer, total) => {
             log.debug('valid credit', total)
             let status = true;
-            let typeCredit = customer.values['custentity_ptg_condicion_credito'].value || "";
+            let typeCredit = customer.values['custentity_ptg_condicion_credito'].value;
 
             if (typeCredit == 1) {
                 status = false;
@@ -2244,7 +2239,7 @@ define(['N/format', 'N/record', 'N/search'],
                 ]
             }
 
-            if ((Number(frecuency) != 3 || Number(frecuency) != 6) && type == 4  && !!lessDate) {
+            if ((Number(frecuency) != 3 || Number(frecuency) != 6) && type == 4 && !!lessDate) {
                 let today = new Date();
                 let lessDates = new Date(today.setDate(today.getDate() - Number(lessDate)));
                 let todayFilter = format.format({
