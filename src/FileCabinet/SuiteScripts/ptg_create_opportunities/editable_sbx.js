@@ -4,10 +4,10 @@
  */
 define(['N/format', 'N/record', 'N/search'],
     /**
-   * @param{format} format
-   * @param{record} record
-   * @param{search} search
-   */
+     * @param{format} format
+     * @param{record} record
+     * @param{search} search
+     */
     (format, record, search) => {
         /**
          * Defines the function that is executed at the beginning of the map/reduce process and generates the input data.
@@ -29,342 +29,272 @@ define(['N/format', 'N/record', 'N/search'],
                 //test prueba nueva laptop
                 let customerSearchObj = search.create({
                     type: "customer",
-                    filters:
-                        [
-                            // ["stage", "anyof", "CUSTOMER"],
-                            // "AND",
-                            // ["custentityptg_tipodecontacto_", "anyof", "2", "4"]
-                            ["stage", "anyof", "CUSTOMER"],
-                            "AND",
-                            ["shippingaddress.custrecord_ptg_tipo_contacto", "anyof", "2", "4"],
-                            //"AND",
-                            //["internalid", "anyof", "329657"]
-                            //["internalid", "anyof", "16061"]
-                            //["internalid", "anyof", "323003"]
-                            //["internalid", "anyof", "322143"]                            
-                            //["internalid", "anyof", "15594"]
-                            //["internalid", "anyof", "323018"]
-                            //["internalid", "anyof", "323019"]
-                            //["internalid", "anyof", "323020"]                            
-                            //["internalid", "anyof", "329437"]
-                            //["internalid", "anyof", "323002", "16061", "323003", "322143", "15594", "323018", "323019", "323020"]
+                    filters: [
+                        ["stage", "anyof", "CUSTOMER"],
+                        "AND",
+                        ["address.custrecord_ptg_tipo_contacto", "anyof", "4"],
+                        "AND",
+                        ["internalid", "anyof", "329656"],
+                        /*"AND",
+                        ["internalid", "anyof", "337501"],*/
+                        /*"AND",
+                        ["internalid", "anyof", "337502"],*/
+                        /*"AND",
+                        ["internalid", "anyof", "337503"],*/
+                        /*"AND",
+                        ["internalid", "anyof", "337504"],*/
+                        /*"AND",
+                        ["internalid", "anyof", "337505"],*/
+                        "AND",
+                        ["subsidiary", "anyof", "25", "23"],
+                        "AND",
+                        ["isinactive", "is", "F"]
 
-                        ],
-                    columns:
-                        [
-                            search.createColumn({ name: "internalid", label: "Internal ID" }),
-                            //Primera versión
-                            // search.createColumn({ name: "custentity_ptg_periododecontacto_", label: "PTG - Periodo de contacto:" }),
-                            // search.createColumn({ name: "custentity_ptg_entrelas_", label: "PTG - Entre las:" }),
-                            // search.createColumn({ name: "custentity_ptg_ylas_", label: "PTG - Y las_" }),
-                            // search.createColumn({ name: "custentityptg_tipodecontacto_", label: "PTG - Tipo de Contacto:" }),
-                            // search.createColumn({ name: "custentity_ptg_lunes_", label: "PTG - Lunes" }),
-                            // search.createColumn({ name: "custentity_ptg_martes_", label: "PTG - Martes" }),
-                            // search.createColumn({ name: "custentity_ptg_miercoles_", label: "PTG - Miercoles" }),
-                            // search.createColumn({ name: "custentity_ptg_jueves_", label: "PTG - Jueves" }),
-                            // search.createColumn({ name: "custentity_ptg_viernes_", label: "PTG - Viernes" }),
-                            // search.createColumn({ name: "custentity_ptg_sabado_", label: "PTG - Sabado" }),
-                            // search.createColumn({ name: "custentity_ptg_domingo_", label: "PTG - Domingo" }),
-                            // search.createColumn({ name: "custentity_ptg_tipodeservicio_", label: "PTG - Tipo de Servicio" }),
-                            // search.createColumn({ name: "subsidiary", label: "Primary Subsidiary" }),
-                            // search.createColumn({ name: "custentity_ptg_articulo_frecuente", label: "PTG - ARTÍCULO FRECUENTE" }),
-                            // search.createColumn({ name: "custentity_ptg_cantidad_frecuente_lt_cil", label: "PTG - CANTIDAD FRECUENTE LT / CIL" }),
-                            // search.createColumn({ name: "custentity_ptg_tipodecliente_", label: "PTG - Tipo de cliente" }),
-                            // search.createColumn({ name: "custentity_ptg_alianza_comercial_cliente", label: "PTG - ALIANZA COMERCIAL DEL CLIENTE" }),
-                            // search.createColumn({ name: "address", label: "Address" }),
-                            //Primera versión
-
-                            //Segunda versión
-                            // search.createColumn({
-                            //     name: "custrecord_ptg_colonia_ruta",
-                            //     join: "Address",
-                            //     label: "PTG - COLONIA Y RUTA"
-                            // }),
-                            // // search.createColumn({ name: "datecreated", label: "Date Created" }),
-                            // // search.createColumn({ name: "custentity_ptg_cada_", label: "PTG - Cada:" })
-                            // search.createColumn({
-                            //     name: "custrecord_ptg_lunes",
-                            //     join: "Address",
-                            //     label: "PTG - LUNES"
-                            //  }),
-                            //  search.createColumn({
-                            //     name: "custrecord_ptg_martes",
-                            //     join: "Address",
-                            //     label: "PTG - MARTES"
-                            //  }),
-                            //  search.createColumn({
-                            //     name: "custrecord_ptg_miercoles",
-                            //     join: "Address",
-                            //     label: "PTG - MIERCOLES"
-                            //  }),
-                            //  search.createColumn({
-                            //     name: "custrecord_ptg_jueves",
-                            //     join: "Address",
-                            //     label: "PTG - JUEVES"
-                            //  }),
-                            //  search.createColumn({
-                            //     name: "custrecord_ptg_viernes",
-                            //     join: "Address",
-                            //     label: "PTG - VIERNES"
-                            //  }),
-                            //  search.createColumn({
-                            //     name: "custrecord_ptg_sabado",
-                            //     join: "Address",
-                            //     label: "PTG - SABADO"
-                            //  }),
-                            //  search.createColumn({
-                            //     name: "custrecord_ptg_domingo",
-                            //     join: "Address",
-                            //     label: "PTG - DOMINGO"
-                            //  }),
-                            //  search.createColumn({
-                            //     name: "custrecord_ptg_cada",
-                            //     join: "Address",
-                            //     label: "PTG - CADA"
-                            //  }),
-                            //  search.createColumn({
-                            //     name: "custrecord_ptg_periodo_contacto",
-                            //     join: "Address",
-                            //     label: "PTG - PERIODO DE CONTACTO"
-                            //  }),
-                            //  search.createColumn({
-                            //     name: "custrecord_ptg_entre_las",
-                            //     join: "Address",
-                            //     label: "PTG - ENTRE LAS"
-                            //  }),
-                            //  search.createColumn({
-                            //     name: "custrecord_ptg_y_las",
-                            //     join: "Address",
-                            //     label: "PTG - Y LAS"
-                            //  }),
-                            //  search.createColumn({
-                            //     name: "custrecord_ptg_tipo_contacto",
-                            //     join: "Address",
-                            //     label: "PTG - TIPO DE CONTACTO"
-                            //  }),
-                            //  search.createColumn({
-                            //     name: "custrecord_ptg_tipo_servicio",
-                            //     join: "Address",
-                            //     label: "PTG - TIPO DE SERVICIO"
-                            //  }),
-                            //  search.createColumn({
-                            //     name: "custrecord_ptg_capacidad_art",
-                            //     join: "Address",
-                            //     label: "PTG - CAPACIDAD DE ARTICULO"
-                            //  }),
-                            //  search.createColumn({name: "subsidiary", label: "Primary Subsidiary"}),
-                            //  search.createColumn({name: "datecreated", label: "Date Created"}),
-                            //  search.createColumn({name: "custentity_ptg_articulo_frecuente", label: "PTG - ARTÍCULO FRECUENTE"}),
-                            //  search.createColumn({name: "custentity_ptg_tipodecliente_", label: "PTG - Tipo de cliente"}),
-                            //  search.createColumn({name: "custentity_ptg_alianza_comercial_cliente", label: "PTG - ALIANZA COMERCIAL DEL CLIENTE"})
-                            //Segunda versión
-                            //Tercera Versión
-                            search.createColumn({
-                                name: "custrecord_ptg_colonia_ruta",
-                                join: "Address",
-                                label: "PTG - COLONIA Y RUTA"
-                            }),
-                            search.createColumn({
-                                name: "custrecord_ptg_lunes",
-                                join: "Address",
-                                label: "PTG - LUNES"
-                            }),
-                            search.createColumn({
-                                name: "custrecord_ptg_martes",
-                                join: "Address",
-                                label: "PTG - MARTES"
-                            }),
-                            search.createColumn({
-                                name: "custrecord_ptg_miercoles",
-                                join: "Address",
-                                label: "PTG - MIERCOLES"
-                            }),
-                            search.createColumn({
-                                name: "custrecord_ptg_jueves",
-                                join: "Address",
-                                label: "PTG - JUEVES"
-                            }),
-                            search.createColumn({
-                                name: "custrecord_ptg_viernes",
-                                join: "Address",
-                                label: "PTG - VIERNES"
-                            }),
-                            search.createColumn({
-                                name: "custrecord_ptg_sabado",
-                                join: "Address",
-                                label: "PTG - SABADO"
-                            }),
-                            search.createColumn({
-                                name: "custrecord_ptg_domingo",
-                                join: "Address",
-                                label: "PTG - DOMINGO"
-                            }),
-                            search.createColumn({
-                                name: "custrecord_ptg_cada",
-                                join: "Address",
-                                label: "PTG - CADA"
-                            }),
-                            search.createColumn({
-                                name: "custrecord_ptg_periodo_contacto",
-                                join: "Address",
-                                label: "PTG - PERIODO DE CONTACTO"
-                            }),
-                            search.createColumn({
-                                name: "custrecord_ptg_entre_las",
-                                join: "Address",
-                                label: "PTG - ENTRE LAS"
-                            }),
-                            search.createColumn({
-                                name: "custrecord_ptg_y_las",
-                                join: "Address",
-                                label: "PTG - Y LAS"
-                            }),
-                            search.createColumn({
-                                name: "custrecord_ptg_tipo_servicio",
-                                join: "Address",
-                                label: "PTG - TIPO DE SERVICIO"
-                            }),
-                            search.createColumn({
-                                name: "custrecord_ptg_articulo_frecuente",
-                                join: "Address",
-                                label: "PTG - ARTICULO FRECUENTE"
-                            }),
-                            search.createColumn({
-                                name: "custrecord_ptg_capacidad_art",
-                                join: "Address",
-                                label: "PTG - CAPACIDAD O CANTIDAD DEL ARTICULO"
-                            }),
-                            search.createColumn({
-                                name: "custrecord_ptg_articulo_frecuente2",
-                                join: "Address",
-                                label: "PTG - ARTICULO FRECUENTE 2"
-                            }),
-                            search.createColumn({
-                                name: "custrecord_ptg_capacidad_can_articulo_2",
-                                join: "Address",
-                                label: "PTG - CAPACIDAD O CANTIDAD DEL ARTICULO 2"
-                            }),
-                            search.createColumn({ name: "subsidiary", label: "Primary Subsidiary" }),
-                            search.createColumn({ name: "datecreated", label: "Date Created" }),
-                            search.createColumn({ name: "custentity_ptg_tipodecliente_", label: "PTG - Tipo de cliente" }),
-                            search.createColumn({ name: "custentity_ptg_alianza_comercial_cliente", label: "PTG - ALIANZA COMERCIAL DEL CLIENTE" }),
-                            search.createColumn({
-                                name: "custrecord_ptg_tipo_contacto",
-                                join: "Address",
-                                label: "PTG - TIPO DE CONTACTO"
-                            }),
-                            search.createColumn({
-                                name: "addressinternalid",
-                                join: "Address",
-                                label: "Address Internal ID"
-                            }),
-                            search.createColumn({
-                                name: "custrecord_ptg_en_la_semana",
-                                join: "Address",
-                                label: "PTG - EN LA SEMANA"
-                            }),
-                            search.createColumn({
-                                name: "custrecord_ptg_fecha_inicio_servicio",
-                                join: "Address",
-                                label: "PTG -FECHA DE INICIO DE SERVICIO"
-                            }),
-                            search.createColumn({
-                                name: "custrecord_ptg_fecha_inicio_servicio_mar",
-                                join: "Address",
-                                label: "PTG -FECHA DE INICIO DE SERVICIO MAR"
-                            }),
-                            search.createColumn({
-                                name: "custrecord_ptg_fecha_inicio_servicio_mi",
-                                join: "Address",
-                                label: "PTG -FECHA DE INICIO DE SERVICIO MI"
-                            }),
-                            search.createColumn({
-                                name: "custrecord_ptg_fecha_inicio_servicio_jue",
-                                join: "Address",
-                                label: "PTG -FECHA DE INICIO DE SERVICIO JUE"
-                            }),
-                            search.createColumn({
-                                name: "custrecord_ptg_fecha_inicio_servicio_vi",
-                                join: "Address",
-                                label: "PTG -FECHA DE INICIO DE SERVICIO VI"
-                            }),
-                            search.createColumn({
-                                name: "custrecord_ptg_fecha_inicio_servicio_sab",
-                                join: "Address",
-                                label: "PTG -FECHA DE INICIO DE SERVICIO SAB"
-                            }),
-                            search.createColumn({
-                                name: "custrecord_ptg_fecha_inicio_servicio_dom",
-                                join: "Address",
-                                label: "PTG -FECHA DE INICIO DE SERVICIO DOM"
-                            }),
-                            search.createColumn({
-                                name: "internalid",
-                                join: "Address",
-                                label: "Internal ID"
-                            }),
-                            search.createColumn({
-                                name: "custrecord_ptg_ruta_asignada",
-                                join: "Address",
-                                label: "PTG - RUTA ASIGNADA"
-                            }),
-                            search.createColumn({
-                                name: "custrecord_ptg_ruta_asignada2",
-                                join: "Address",
-                                label: "PTG - RUTA ASIGNADA 2"
-                            }),
-                            search.createColumn({
-                                name: "custrecord_ptg_ruta_asignada_3",
-                                join: "Address",
-                                label: "PTG - RUTA ASIGNADA 3"
-                            }),
-                            search.createColumn({
-                                name: "custrecord_ptg_ruta_asignada_4",
-                                join: "Address",
-                                label: "PTG - RUTA ASIGNADA 4"
-                            }),
-                            search.createColumn({ name: "custentity_ptg_plantarelacionada_", label: "PTG - Planta relacionada: " }),
-                            search.createColumn({
-                                name: "custrecord_ptg_rango_dias",
-                                join: "CUSTENTITY_PTG_PLANTARELACIONADA_",
-                                label: "PTG - RANGO DE DIAS"
-                            }),
-                            // search.createColumn({
-                            //     name: "custrecord_ptg_entrega_pedidos_domingo",
-                            //     join: "CUSTENTITY_PTG_PLANTARELACIONADA_",
-                            //     label: "PTG - ENTREGA PEDIDOS EN DOMINGO"
-                            // }),
-                            search.createColumn({ name: "custentity_ptg_condicion_credito", label: "PTG - CONDICION DE CREDITO" }),
-                            search.createColumn({ name: "creditlimit", label: "CREDIT LIMIT" }),
-                            search.createColumn({ name: "balance", label: "BALANCE" }),
-                            search.createColumn({ name: "overduebalance", label: "OVERDUE BALANCE" }),
-                            search.createColumn({
-                                name: "custrecord_ptg_direccion_contrato",
-                                join: "Address",
-                                label: "PTG - DIRECCION CON CONTRATO"
-                            }),
-                            search.createColumn({
-                                name: "custrecord_ptg_numero_contrato",
-                                join: "Address",
-                                label: "PTG - NUMERO DE CONTRATO"
-                            }),
-                            search.createColumn({ name: "addresslabel", label: "Address Label" }),
-                            search.createColumn({ name: "custentity_ptg_tipo_descuento", label: "PTG - TIPO DE DESCUENTO" }),
-                            search.createColumn({ name: "custentity_ptg_descuento_asignar", label: "PTG - DESCUENTO PARA ASIGNAR ( % O $ )" })
-                        ]
+                    ],
+                    columns: [
+                        search.createColumn({
+                            name: "internalid",
+                            label: "Internal ID"
+                        }),
+                        //Tercera Versión
+                        search.createColumn({
+                            name: "custrecord_ptg_colonia_ruta",
+                            join: "Address",
+                            label: "PTG - COLONIA Y RUTA"
+                        }),
+                        search.createColumn({
+                            name: "custrecord_ptg_lunes",
+                            join: "Address",
+                            label: "PTG - LUNES"
+                        }),
+                        search.createColumn({
+                            name: "custrecord_ptg_martes",
+                            join: "Address",
+                            label: "PTG - MARTES"
+                        }),
+                        search.createColumn({
+                            name: "custrecord_ptg_miercoles",
+                            join: "Address",
+                            label: "PTG - MIERCOLES"
+                        }),
+                        search.createColumn({
+                            name: "custrecord_ptg_jueves",
+                            join: "Address",
+                            label: "PTG - JUEVES"
+                        }),
+                        search.createColumn({
+                            name: "custrecord_ptg_viernes",
+                            join: "Address",
+                            label: "PTG - VIERNES"
+                        }),
+                        search.createColumn({
+                            name: "custrecord_ptg_sabado",
+                            join: "Address",
+                            label: "PTG - SABADO"
+                        }),
+                        search.createColumn({
+                            name: "custrecord_ptg_domingo",
+                            join: "Address",
+                            label: "PTG - DOMINGO"
+                        }),
+                        search.createColumn({
+                            name: "custrecord_ptg_cada",
+                            join: "Address",
+                            label: "PTG - CADA"
+                        }),
+                        search.createColumn({
+                            name: "custrecord_ptg_periodo_contacto",
+                            join: "Address",
+                            label: "PTG - PERIODO DE CONTACTO"
+                        }),
+                        search.createColumn({
+                            name: "custrecord_ptg_entre_las",
+                            join: "Address",
+                            label: "PTG - ENTRE LAS"
+                        }),
+                        search.createColumn({
+                            name: "custrecord_ptg_y_las",
+                            join: "Address",
+                            label: "PTG - Y LAS"
+                        }),
+                        search.createColumn({
+                            name: "custrecord_ptg_tipo_servicio",
+                            join: "Address",
+                            label: "PTG - TIPO DE SERVICIO"
+                        }),
+                        search.createColumn({
+                            name: "custrecord_ptg_articulo_frecuente",
+                            join: "Address",
+                            label: "PTG - ARTICULO FRECUENTE"
+                        }),
+                        search.createColumn({
+                            name: "custrecord_ptg_capacidad_art",
+                            join: "Address",
+                            label: "PTG - CAPACIDAD O CANTIDAD DEL ARTICULO"
+                        }),
+                        search.createColumn({
+                            name: "custrecord_ptg_articulo_frecuente2",
+                            join: "Address",
+                            label: "PTG - ARTICULO FRECUENTE 2"
+                        }),
+                        search.createColumn({
+                            name: "custrecord_ptg_capacidad_can_articulo_2",
+                            join: "Address",
+                            label: "PTG - CAPACIDAD O CANTIDAD DEL ARTICULO 2"
+                        }),
+                        search.createColumn({
+                            name: "subsidiary",
+                            label: "Primary Subsidiary"
+                        }),
+                        search.createColumn({
+                            name: "datecreated",
+                            label: "Date Created"
+                        }),
+                        search.createColumn({
+                            name: "custentity_ptg_tipodecliente_",
+                            label: "PTG - Tipo de cliente"
+                        }),
+                        search.createColumn({
+                            name: "custentity_ptg_alianza_comercial_cliente",
+                            label: "PTG - ALIANZA COMERCIAL DEL CLIENTE"
+                        }),
+                        search.createColumn({
+                            name: "custrecord_ptg_tipo_contacto",
+                            join: "Address",
+                            label: "PTG - TIPO DE CONTACTO"
+                        }),
+                        search.createColumn({
+                            name: "addressinternalid",
+                            join: "Address",
+                            label: "Address Internal ID"
+                        }),
+                        search.createColumn({
+                            name: "custrecord_ptg_en_la_semana",
+                            join: "Address",
+                            label: "PTG - EN LA SEMANA"
+                        }),
+                        search.createColumn({
+                            name: "custrecord_ptg_fecha_inicio_servicio",
+                            join: "Address",
+                            label: "PTG -FECHA DE INICIO DE SERVICIO"
+                        }),
+                        search.createColumn({
+                            name: "custrecord_ptg_fecha_inicio_servicio_mar",
+                            join: "Address",
+                            label: "PTG -FECHA DE INICIO DE SERVICIO MAR"
+                        }),
+                        search.createColumn({
+                            name: "custrecord_ptg_fecha_inicio_servicio_mi",
+                            join: "Address",
+                            label: "PTG -FECHA DE INICIO DE SERVICIO MI"
+                        }),
+                        search.createColumn({
+                            name: "custrecord_ptg_fecha_inicio_servicio_jue",
+                            join: "Address",
+                            label: "PTG -FECHA DE INICIO DE SERVICIO JUE"
+                        }),
+                        search.createColumn({
+                            name: "custrecord_ptg_fecha_inicio_servicio_vi",
+                            join: "Address",
+                            label: "PTG -FECHA DE INICIO DE SERVICIO VI"
+                        }),
+                        search.createColumn({
+                            name: "custrecord_ptg_fecha_inicio_servicio_sab",
+                            join: "Address",
+                            label: "PTG -FECHA DE INICIO DE SERVICIO SAB"
+                        }),
+                        search.createColumn({
+                            name: "custrecord_ptg_fecha_inicio_servicio_dom",
+                            join: "Address",
+                            label: "PTG -FECHA DE INICIO DE SERVICIO DOM"
+                        }),
+                        search.createColumn({
+                            name: "internalid",
+                            join: "Address",
+                            label: "Internal ID"
+                        }),
+                        search.createColumn({
+                            name: "custrecord_ptg_ruta_asignada",
+                            join: "Address",
+                            label: "PTG - RUTA ASIGNADA"
+                        }),
+                        search.createColumn({
+                            name: "custrecord_ptg_ruta_asignada2",
+                            join: "Address",
+                            label: "PTG - RUTA ASIGNADA 2"
+                        }),
+                        search.createColumn({
+                            name: "custrecord_ptg_ruta_asignada_3",
+                            join: "Address",
+                            label: "PTG - RUTA ASIGNADA 3"
+                        }),
+                        search.createColumn({
+                            name: "custrecord_ptg_ruta_asignada_4",
+                            join: "Address",
+                            label: "PTG - RUTA ASIGNADA 4"
+                        }),
+                        search.createColumn({
+                            name: "custentity_ptg_plantarelacionada_",
+                            label: "PTG - Planta relacionada: "
+                        }),
+                        search.createColumn({
+                            name: "custrecord_ptg_rango_dias",
+                            join: "CUSTENTITY_PTG_PLANTARELACIONADA_",
+                            label: "PTG - RANGO DE DIAS"
+                        }),
+                        // search.createColumn({
+                        //     name: "custrecord_ptg_entrega_pedidos_domingo",
+                        //     join: "CUSTENTITY_PTG_PLANTARELACIONADA_",
+                        //     label: "PTG - ENTREGA PEDIDOS EN DOMINGO"
+                        // }),
+                        search.createColumn({
+                            name: "custentity_ptg_condicion_credito",
+                            label: "PTG - CONDICION DE CREDITO"
+                        }),
+                        search.createColumn({
+                            name: "creditlimit",
+                            label: "CREDIT LIMIT"
+                        }),
+                        search.createColumn({
+                            name: "balance",
+                            label: "BALANCE"
+                        }),
+                        search.createColumn({
+                            name: "overduebalance",
+                            label: "OVERDUE BALANCE"
+                        }),
+                        search.createColumn({
+                            name: "custrecord_ptg_direccion_contrato",
+                            join: "Address",
+                            label: "PTG - DIRECCION CON CONTRATO"
+                        }),
+                        search.createColumn({
+                            name: "custrecord_ptg_numero_contrato",
+                            join: "Address",
+                            label: "PTG - NUMERO DE CONTRATO"
+                        }),
+                        search.createColumn({
+                            name: "addresslabel",
+                            label: "Address Label"
+                        }),
+                        search.createColumn({
+                            name: "custentity_ptg_tipo_descuento",
+                            label: "PTG - TIPO DE DESCUENTO"
+                        }),
+                        search.createColumn({
+                            name: "custentity_ptg_descuento_asignar",
+                            label: "PTG - DESCUENTO PARA ASIGNAR ( % O $ )"
+                        }),
+                        search.createColumn({
+                            name: "custentity_ptg_descuento_por_kilo_",
+                            label: "PTG - DESCUENTO POR KILO"
+                        })
+                    ]
                 });
 
 
-                let searchResultCount = customerSearchObj.runPaged().count;
-                if (searchResultCount > 0) {
-                    return customerSearchObj
-                }
-                //log.debug("customerSearchObj result count", searchResultCount);
-                // customerSearchObj.run().each(function (result) {
-                //     // .run().each has a limit of 4,000 results
-                //     log.debug('result', result)
-                //     return true;
-                // });    
+                return customerSearchObj
+
             } catch (error) {
                 log.debug('err', error)
             }
@@ -437,56 +367,8 @@ define(['N/format', 'N/record', 'N/search'],
                     let typeFrequency = infoCustomer.values["custrecord_ptg_periodo_contacto.Address"].value;
                     let customer = infoCustomer.values.internalid.value;
                     let lessDates = Number(infoCustomer.values["custrecord_ptg_rango_dias.CUSTENTITY_PTG_PLANTARELACIONADA_"]) || '';
-                    let existOP = validExistOp(Number(customer), Number(contactType), infoCustomer.values['addressinternalid.Address'], typeFrequency, lessDates);
-                    log.debug('existOP antes del switch', existOP)
 
-                    //está validacion sirve por si ha tenido un servicio anterior con respecto al de meses y mensual
-                    //por si tuvo un servicio antes de la fecha programada
-                    if (existOP.exist && existOP.isBefore) {
-                        let serviceBeforeDate = validServiceAll(infoCustomer, typeFrequency, week, dates);
-                        log.debug('serviceBeforeDate', serviceBeforeDate)
-                        log.debug('customer updated beforeDate', infoCustomer)
-
-                        log.debug('actualizar fecha direccion', 'fecha por servicio anterior');
-                        if (serviceBeforeDate) {
-                            let customerRecord = record.load({
-                                type: record.Type.CUSTOMER,
-                                id: infoCustomer.values.internalid.value,
-                                isDynamic: true
-                            });
-
-                            let lineAddress = customerRecord.findSublistLineWithValue({
-                                sublistId: 'addressbook',
-                                fieldId: 'addressbookaddress',
-                                value: infoCustomer.values["internalid.Address"].value
-                            });
-
-                            log.debug('id lineAddress', lineAddress)
-                            customerRecord.selectLine({
-                                sublistId: 'addressbook',
-                                line: lineAddress
-                            });
-
-                            let addressSubrecord = customerRecord.getCurrentSublistSubrecord({
-                                sublistId: 'addressbook',
-                                fieldId: 'addressbookaddress'
-                            });
-
-                            if (infoCustomer.values['idFieldDate']) {
-                                addressSubrecord.setText({
-                                    fieldId: infoCustomer.values['idFieldDate'],
-                                    text: existOP.dateLastService
-                                });
-                            }
-
-                            customerRecord.commitLine({
-                                sublistId: "addressbook"
-                            });
-                            let idUpdateDate = customerRecord.save();
-                            log.debug('se actualizo la fecha de la direcion', idUpdateDate)
-                        }
-                    }
-
+                    //if (!existOP.exist) {
                     switch (typeFrequency) {
                         //Dias : Solo se le suman la cantidad de dìas a la fecha de ultimo día de servicio
                         case "1":
@@ -497,16 +379,83 @@ define(['N/format', 'N/record', 'N/search'],
                             //nueva validacion si es la fecha en que le toca servicio
                             let makeServiceDay = validServiceAll(infoCustomer, typeFrequency, week, dates);
                             log.debug('makeServiceDay', makeServiceDay)
-                            log.debug('customer updated', infoCustomer)
+                            if (makeServiceDay) {
+                                let existOP = validExistOp(Number(customer), Number(contactType), infoCustomer.values['addressinternalid.Address'], typeFrequency, lessDates);
+                                log.debug('existOP de su fecha de programacion', existOP)
+                                //está validacion sirve por si ha tenido un servicio anterior con respecto al de meses y mensual
+                                //por si tuvo un servicio antes de la fecha programada
+                                if (existOP.exist || existOP.isBefore) {
+                                    log.debug('customer updated beforeDate because has before', infoCustomer)
+                                    if (typeFrequency != "6" && typeFrequency != "3") {
+                                        log.debug('actualizar fecha direccion', 'fecha por servicio anterior y que no sea de tipo 6 o 3');
+                                        let dateUpdate = getDateOfExist(infoCustomer, typeFrequency, week, dates);
+                                        let customerRecord = record.load({
+                                            type: record.Type.CUSTOMER,
+                                            id: infoCustomer.values.internalid.value,
+                                            isDynamic: true
+                                        });
+
+                                        let lineAddress = customerRecord.findSublistLineWithValue({
+                                            sublistId: 'addressbook',
+                                            fieldId: 'addressbookaddress',
+                                            value: infoCustomer.values["internalid.Address"].value
+                                        });
+
+                                        log.debug('id lineAddress', lineAddress)
+                                        customerRecord.selectLine({
+                                            sublistId: 'addressbook',
+                                            line: lineAddress
+                                        });
+
+                                        let addressSubrecord = customerRecord.getCurrentSublistSubrecord({
+                                            sublistId: 'addressbook',
+                                            fieldId: 'addressbookaddress'
+                                        });
+
+                                        if (infoCustomer.values['idFieldDate']) {
+                                            addressSubrecord.setText({
+                                                fieldId: infoCustomer.values['idFieldDate'],
+                                                text: infoCustomer.values['dateToUpdate'],
+                                            });
+
+                                            addressSubrecord.setValue({
+                                                fieldId: 'custrecord_drt_pm_estado',
+                                                value: 513
+                                            });
+
+                                            addressSubrecord.setValue({
+                                                fieldId: 'custrecord_drt_pm_ciudad',
+                                                value: 584
+                                            });
+
+                                            addressSubrecord.setValue({
+                                                fieldId: 'custrecord_disa_zona_pm',
+                                                value: 595
+                                            });
+                                        }
+
+                                        customerRecord.commitLine({
+                                            sublistId: "addressbook"
+                                        });
+                                        let idUpdateDate = customerRecord.save({
+                                            enableSourcing: true,
+                                            ignoreMandatoryFields: true
+                                        });
+                                        log.debug('se actualizo la fecha de la direcion por servicio abierto', idUpdateDate)
+                                        return;
+                                    }
+                                }
+                            }
+                            //log.debug('customer updated', infoCustomer)
                             //Validamos el tipo de servicio si es cilindro , estacionario o mixto
-                            log.debug('existOP día programado', existOP)
-                            if (!!typeService && Number(typeService.value) == 1 && makeServiceDay && !existOP.exist) {
+                            //log.debug('existOP día programado', existOP)
+                            if (!!typeService && Number(typeService.value) == 1 && makeServiceDay /*&& !existOP.exist*/) {
                                 log.debug('typeService', 'clindro')
                                 makeOPCilindro(typeService.value, infoCustomer, Number(contactType));
-                            } else if (!!typeService && Number(typeService.value) == 2 && makeServiceDay && !existOP.exist) {
+                            } else if (!!typeService && Number(typeService.value) == 2 && makeServiceDay /*&& !existOP.exist*/) {
                                 log.debug('typeService', 'estacionario')
                                 makeOPEstacionario(typeService.value, infoCustomer, Number(contactType));
-                            } else if (!!typeService && Number(typeService.value) == 4 && makeServiceDay && !existOP.exist) {
+                            } else if (!!typeService && Number(typeService.value) == 4 && makeServiceDay /*&& !existOP.exist*/) {
                                 log.debug('typeService', 'ambos')
                                 makeOPCilindro(typeService.value, infoCustomer, Number(contactType));
                                 makeOPEstacionario(typeService.value, infoCustomer, Number(contactType));
@@ -521,24 +470,92 @@ define(['N/format', 'N/record', 'N/search'],
 
                             //nueva validacion si es la fecha en que le toca servicio
                             let makeserviceweeks = validServiceAll(infoCustomer, typeFrequency, week, dates);
-                            log.debug('makeserviceweeks', makeserviceweeks)
-                            log.debug('customer updated', infoCustomer)
+                            log.debug('makeserviceweeks', makeserviceweeks);
+                            if (makeserviceweeks) {
+                                let existOP = validExistOp(Number(customer), Number(contactType), infoCustomer.values['addressinternalid.Address'], typeFrequency, lessDates);
+                                log.debug('existOP de su fecha de programacion', existOP)
+
+                                //está validacion sirve por si ha tenido un servicio anterior con respecto al de meses y mensual
+                                //por si tuvo un servicio antes de la fecha programada
+                                if (existOP.exist || existOP.isBefore) {
+                                    log.debug('customer updated beforeDate because has before', infoCustomer)
+                                    if (typeFrequency != "6" && typeFrequency != "3") {
+                                        log.debug('actualizar fecha direccion', 'fecha por servicio anterior y que no sea de tipo 6 o 3');
+                                        let dateUpdate = getDateOfExist(infoCustomer, typeFrequency, week, dates);
+                                        let customerRecord = record.load({
+                                            type: record.Type.CUSTOMER,
+                                            id: infoCustomer.values.internalid.value,
+                                            isDynamic: true
+                                        });
+
+                                        let lineAddress = customerRecord.findSublistLineWithValue({
+                                            sublistId: 'addressbook',
+                                            fieldId: 'addressbookaddress',
+                                            value: infoCustomer.values["internalid.Address"].value
+                                        });
+
+                                        log.debug('id lineAddress', lineAddress)
+                                        customerRecord.selectLine({
+                                            sublistId: 'addressbook',
+                                            line: lineAddress
+                                        });
+
+                                        let addressSubrecord = customerRecord.getCurrentSublistSubrecord({
+                                            sublistId: 'addressbook',
+                                            fieldId: 'addressbookaddress'
+                                        });
+
+                                        if (infoCustomer.values['idFieldDate']) {
+                                            addressSubrecord.setText({
+                                                fieldId: infoCustomer.values['idFieldDate'],
+                                                text: infoCustomer.values['dateToUpdate'],
+                                            });
+
+                                            addressSubrecord.setValue({
+                                                fieldId: 'custrecord_drt_pm_estado',
+                                                value: 513
+                                            });
+
+                                            addressSubrecord.setValue({
+                                                fieldId: 'custrecord_drt_pm_ciudad',
+                                                value: 584
+                                            });
+
+                                            addressSubrecord.setValue({
+                                                fieldId: 'custrecord_disa_zona_pm',
+                                                value: 595
+                                            });
+                                        }
+
+                                        customerRecord.commitLine({
+                                            sublistId: "addressbook"
+                                        });
+                                        let idUpdateDate = customerRecord.save({
+                                            enableSourcing: true,
+                                            ignoreMandatoryFields: true
+                                        });
+                                        log.debug('se actualizo la fecha de la direcion por servicio abierto', idUpdateDate)
+                                        return;
+                                    }
+                                }
+                            }
+                            //log.debug('customer updated', infoCustomer)
                             //Validamos el tipo de servicio si es cilindro , estacionario o mixto y que no tenga creada una oportunidad                                                                                    
-                            log.debug('existOP', existOP)
-                            if (!!typeService && Number(typeService.value) == 1 && makeserviceweeks && !existOP.exist) {
+                            //log.debug('existOP', existOP)
+                            if (!!typeService && Number(typeService.value) == 1 && makeserviceweeks /*&& !existOP.exist*/) {
                                 log.debug('typeService', 'clindro')
                                 makeOPCilindro(typeService.value, infoCustomer, Number(contactType));
-                            } else if (!!typeService && Number(typeService.value) == 2 && makeserviceweeks && !existOP.exist) {
+                            } else if (!!typeService && Number(typeService.value) == 2 && makeserviceweeks /*&& !existOP.exist*/) {
                                 log.debug('typeService', 'estacionario')
                                 makeOPEstacionario(typeService.value, infoCustomer, Number(contactType));
-                            } else if (!!typeService && Number(typeService.value) == 4 && makeserviceweeks && !existOP.exist) {
+                            } else if (!!typeService && Number(typeService.value) == 4 && makeserviceweeks /*&& !existOP.exist*/) {
                                 log.debug('typeService', 'ambos')
                                 makeOPCilindro(typeService.value, infoCustomer, Number(contactType));
                                 makeOPEstacionario(typeService.value, infoCustomer, Number(contactType));
                             }
 
                             break;
-                        //Semana, los días de la semana que le tocan servicio
+                        //Semana, los días de la semana que le tocan servicio                        
                         case "3":
                             log.debug('week', typeFrequency)
                             // //Validar si le toca hoy el servicio 
@@ -547,7 +564,10 @@ define(['N/format', 'N/record', 'N/search'],
                             //nueva validacion si es la fecha en que le toca servicio
                             let makeServiceWeek = validServiceAll(infoCustomer, typeFrequency, week, dates);
                             log.debug('makeServiceWeek', makeServiceWeek);
-                            log.debug('customer updated', infoCustomer);
+                            let existOP = validExistOp(Number(customer), Number(contactType), infoCustomer.values['addressinternalid.Address'], typeFrequency, lessDates);
+                            log.debug('existOP de su fecha de programacion', existOP)
+
+                            //log.debug('customer updated', infoCustomer);
 
                             //Validamos el tipo de servicio si es cilindro , estacionario o mixto                         
                             if (!!typeService && Number(typeService.value) == 1 && makeServiceWeek && !existOP.exist) {
@@ -569,15 +589,84 @@ define(['N/format', 'N/record', 'N/search'],
                             // //nueva validacion si es la fecha en que le toca servicio
                             let makeServiceMounthDay = validServiceAll(infoCustomer, typeFrequency, week, dates);
                             log.debug('makeServiceMounthDay', makeServiceMounthDay)
-                            log.debug('customer updated', infoCustomer)
+                            if (makeServiceMounthDay) {
+                                let existOP = validExistOp(Number(customer), Number(contactType), infoCustomer.values['addressinternalid.Address'], typeFrequency, lessDates);
+                                log.debug('existOP de su fecha de programacion', existOP)
+
+                                //está validacion sirve por si ha tenido un servicio anterior con respecto al de meses y mensual
+                                //por si tuvo un servicio antes de la fecha programada
+                                if (existOP.exist || existOP.isBefore) {
+                                    log.debug('customer updated beforeDate because has before', infoCustomer)
+                                    if (typeFrequency != "6" && typeFrequency != "3") {
+                                        log.debug('actualizar fecha direccion', 'fecha por servicio anterior y que no sea de tipo 6 o 3');
+                                        let dateUpdate = getDateOfExist(infoCustomer, typeFrequency, week, dates);
+                                        let customerRecord = record.load({
+                                            type: record.Type.CUSTOMER,
+                                            id: infoCustomer.values.internalid.value,
+                                            isDynamic: true
+                                        });
+
+                                        let lineAddress = customerRecord.findSublistLineWithValue({
+                                            sublistId: 'addressbook',
+                                            fieldId: 'addressbookaddress',
+                                            value: infoCustomer.values["internalid.Address"].value
+                                        });
+
+                                        log.debug('id lineAddress', lineAddress)
+                                        customerRecord.selectLine({
+                                            sublistId: 'addressbook',
+                                            line: lineAddress
+                                        });
+
+                                        let addressSubrecord = customerRecord.getCurrentSublistSubrecord({
+                                            sublistId: 'addressbook',
+                                            fieldId: 'addressbookaddress'
+                                        });
+
+                                        if (infoCustomer.values['idFieldDate']) {
+                                            addressSubrecord.setText({
+                                                fieldId: infoCustomer.values['idFieldDate'],
+                                                text: infoCustomer.values['dateToUpdate'],
+                                            });
+
+                                            addressSubrecord.setValue({
+                                                fieldId: 'custrecord_drt_pm_estado',
+                                                value: 513
+                                            });
+
+                                            addressSubrecord.setValue({
+                                                fieldId: 'custrecord_drt_pm_ciudad',
+                                                value: 584
+                                            });
+
+                                            addressSubrecord.setValue({
+                                                fieldId: 'custrecord_disa_zona_pm',
+                                                value: 595
+                                            });
+                                        }
+
+                                        customerRecord.commitLine({
+                                            sublistId: "addressbook"
+                                        });
+                                        let idUpdateDate = customerRecord.save({
+                                            enableSourcing: true,
+                                            ignoreMandatoryFields: true
+                                        });
+                                        log.debug('se actualizo la fecha de la direcion por servicio abierto', idUpdateDate)
+                                        return;
+                                    }
+                                }
+                            }
+
+                            //log.debug('customer updated', infoCustomer)
                             //Validamos el tipo de servicio si es cilindro , estacionario o mixto                         
-                            if (!!typeService && Number(typeService.value) == 1 && makeServiceMounthDay && !existOP.exist) {
+                            if (!!typeService && Number(typeService.value) == 1 && makeServiceMounthDay /*&& !existOP.exist*/) {
                                 log.debug('typeService', 'clindro')
                                 makeOPCilindro(typeService.value, infoCustomer, Number(contactType));
-                            } else if (!!typeService && Number(typeService.value) == 2 && makeServiceMounthDay && !existOP.exist) {
+                            } else if (!!typeService && Number(typeService.value) == 2 && makeServiceMounthDay /*&& !existOP.exist*/) {
                                 log.debug('typeService', 'estacionario')
                                 makeOPEstacionario(typeService.value, infoCustomer, Number(contactType));
-                            } else if (!!typeService && Number(typeService.value) == 4 && makeServiceMounthDay && !existOP.exist) {
+                            } else if (!!typeService && Number(typeService.value) == 4 && makeServiceMounthDay /*&& !existOP.exist*/) {
                                 log.debug('typeService', 'ambos')
                                 makeOPCilindro(typeService.value, infoCustomer, Number(contactType));
                                 makeOPEstacionario(typeService.value, infoCustomer, Number(contactType));
@@ -590,15 +679,83 @@ define(['N/format', 'N/record', 'N/search'],
                             //nueva validacion si es la fecha en que le toca servicio
                             let makeServiceAtMonthly = validServiceAll(infoCustomer, typeFrequency, week, dates);
                             log.debug('makeServiceAtMonthly', makeServiceAtMonthly)
-                            log.debug('customer updated', infoCustomer)
+                            if (makeServiceAtMonthly) {
+                                let existOP = validExistOp(Number(customer), Number(contactType), infoCustomer.values['addressinternalid.Address'], typeFrequency, lessDates);
+                                log.debug('existOP de su fecha de programacion', existOP)
+
+                                //está validacion sirve por si ha tenido un servicio anterior con respecto al de meses y mensual
+                                //por si tuvo un servicio antes de la fecha programada
+                                if (existOP.exist || existOP.isBefore) {
+                                    log.debug('customer updated beforeDate because has before', infoCustomer)
+                                    if (typeFrequency != "6" && typeFrequency != "3") {
+                                        log.debug('actualizar fecha direccion', 'fecha por servicio anterior y que no sea de tipo 6 o 3');
+                                        let dateUpdate = getDateOfExist(infoCustomer, typeFrequency, week, dates);
+                                        let customerRecord = record.load({
+                                            type: record.Type.CUSTOMER,
+                                            id: infoCustomer.values.internalid.value,
+                                            isDynamic: true
+                                        });
+
+                                        let lineAddress = customerRecord.findSublistLineWithValue({
+                                            sublistId: 'addressbook',
+                                            fieldId: 'addressbookaddress',
+                                            value: infoCustomer.values["internalid.Address"].value
+                                        });
+
+                                        log.debug('id lineAddress', lineAddress)
+                                        customerRecord.selectLine({
+                                            sublistId: 'addressbook',
+                                            line: lineAddress
+                                        });
+
+                                        let addressSubrecord = customerRecord.getCurrentSublistSubrecord({
+                                            sublistId: 'addressbook',
+                                            fieldId: 'addressbookaddress'
+                                        });
+
+                                        if (infoCustomer.values['idFieldDate']) {
+                                            addressSubrecord.setText({
+                                                fieldId: infoCustomer.values['idFieldDate'],
+                                                text: infoCustomer.values['dateToUpdate'],
+                                            });
+
+                                            addressSubrecord.setValue({
+                                                fieldId: 'custrecord_drt_pm_estado',
+                                                value: 513
+                                            });
+
+                                            addressSubrecord.setValue({
+                                                fieldId: 'custrecord_drt_pm_ciudad',
+                                                value: 584
+                                            });
+
+                                            addressSubrecord.setValue({
+                                                fieldId: 'custrecord_disa_zona_pm',
+                                                value: 595
+                                            });
+                                        }
+
+                                        customerRecord.commitLine({
+                                            sublistId: "addressbook"
+                                        });
+                                        let idUpdateDate = customerRecord.save({
+                                            enableSourcing: true,
+                                            ignoreMandatoryFields: true
+                                        });
+                                        log.debug('se actualizo la fecha de la direcion por servicio abierto', idUpdateDate)
+                                        return;
+                                    }
+                                }
+                            }
+                            //log.debug('customer updated', infoCustomer)
                             //Validamos el tipo de servicio si es cilindro , estacionario o mixto                         
-                            if (!!typeService && Number(typeService.value) == 1 && makeServiceAtMonthly && !existOP.exist) {
+                            if (!!typeService && Number(typeService.value) == 1 && makeServiceAtMonthly /*&& !existOP.exist*/) {
                                 log.debug('typeService', 'clindro')
                                 makeOPCilindro(typeService.value, infoCustomer, Number(contactType));
-                            } else if (!!typeService && Number(typeService.value) == 2 && makeServiceAtMonthly && !existOP.exist) {
+                            } else if (!!typeService && Number(typeService.value) == 2 && makeServiceAtMonthly /*&& !existOP.exist*/) {
                                 log.debug('typeService', 'estacionario')
                                 makeOPEstacionario(typeService.value, infoCustomer, Number(contactType));
-                            } else if (!!typeService && Number(typeService.value) == 4 && makeServiceAtMonthly && !existOP.exist) {
+                            } else if (!!typeService && Number(typeService.value) == 4 && makeServiceAtMonthly /*&& !existOP.exist*/) {
                                 log.debug('typeService', 'ambos')
                                 makeOPCilindro(typeService.value, infoCustomer, Number(contactType));
                                 makeOPEstacionario(typeService.value, infoCustomer, Number(contactType));
@@ -612,15 +769,18 @@ define(['N/format', 'N/record', 'N/search'],
                             //nueva validacion si es la fecha en que le toca servicio
                             let makeServiceAllDays = validServiceAll(infoCustomer, typeFrequency, week, dates);
                             log.debug('makeServiceAllDays', makeServiceAllDays)
-                            log.debug('customer updated', infoCustomer)
+                            let existOPDiario = validExistOp(Number(customer), Number(contactType), infoCustomer.values['addressinternalid.Address'], typeFrequency, lessDates);
+                            log.debug('existOP de su fecha de programacion', existOPDiario)
+
+                            //log.debug('customer updated', infoCustomer)
                             //Validamos el tipo de servicio si es cilindro , estacionario o mixto                         
-                            if (!!typeService && Number(typeService.value) == 1 && makeServiceAllDays && !existOP.exist) {
+                            if (!!typeService && Number(typeService.value) == 1 && makeServiceAllDays && !existOPDiario.exist) {
                                 log.debug('typeService', 'clindro')
                                 makeOPCilindro(typeService.value, infoCustomer, Number(contactType));
-                            } else if (!!typeService && Number(typeService.value) == 2 && makeServiceAllDays && !existOP.exist) {
+                            } else if (!!typeService && Number(typeService.value) == 2 && makeServiceAllDays && !existOPDiario.exist) {
                                 log.debug('typeService', 'estacionario')
                                 makeOPEstacionario(typeService.value, infoCustomer, Number(contactType));
-                            } else if (!!typeService && Number(typeService.value) == 4 && makeServiceAllDays && !existOP.exist) {
+                            } else if (!!typeService && Number(typeService.value) == 4 && makeServiceAllDays && !existOPDiario.exist) {
                                 log.debug('typeService', 'ambos')
                                 makeOPCilindro(typeService.value, infoCustomer, Number(contactType));
                                 makeOPEstacionario(typeService.value, infoCustomer, Number(contactType));
@@ -628,9 +788,9 @@ define(['N/format', 'N/record', 'N/search'],
 
                             break;
                     }
-
+                    //}
                 }
-                else if (Number(contactType) == 2) {
+                /*else if (Number(contactType) == 2) {
                     log.debug('aviso', infoCustomer)
                     let typeService = infoCustomer.values["custrecord_ptg_tipo_servicio.Address"];
                     let typeFrequency = infoCustomer.values["custrecord_ptg_periodo_contacto.Address"].value;
@@ -778,7 +938,7 @@ define(['N/format', 'N/record', 'N/search'],
 
                             break;
                     }
-                }
+                }*/
 
             } catch (error) {
                 log.debug('err map', error)
@@ -786,124 +946,10 @@ define(['N/format', 'N/record', 'N/search'],
 
         }
 
-        //Validar el tipo de servicio y frecuencia
-        const validService = (type, weeks, date, frequency) => {
-            log.debug('validService type', type)
-            log.debug('frequency type', frequency)
-            let day = new Date();
-
-            switch (type) {
-                //Dias
-                case "1":
-                    let days = (day.getDay() == 0) ? 7 : day.getDay();
-                    if (weeks.includes(days)) {
-                        return true;
-                    }
-                    break;
-                //Semanal
-                case "2":
-                    let week = (day.getDay() == 0) ? 7 : day.getDay();
-                    let initWeek = getWeek(date);
-                    let today = getWeek(day);
-                    log.debug('initWeek', initWeek);
-                    log.debug('today', today);
-                    let resultMultiple = isMultiple(initWeek, today, frequency);
-                    log.debug('resultMultiple', resultMultiple)
-                    if (weeks.includes(week) && resultMultiple) {
-                        return true;
-                    }
-                    break;
-                //Mensual
-                case "3":
-                    let initialFormattedDateString = date;
-                    //log.debug('initialFormattedDateString', initialFormattedDateString)
-                    let parsedDateStringAsRawDateObject = format.parse({
-                        value: initialFormattedDateString,
-                        type: format.Type.DATE,
-                        timezone: format.Timezone.AMERICA_MEXICO_CITY
-                    });
-
-                    let initDate = parsedDateStringAsRawDateObject.getDate();
-                    let todayMounth = day.getDate();
-                    log.debug('initDate mounth', initDate)
-                    log.debug('todayMounth mounth', todayMounth)
-                    if (initDate == todayMounth) {
-                        return true;
-                    }
-                    break;
-                // case "5":
-                //     let initialFormattedDateString = date;
-                //     //log.debug('initialFormattedDateString', initialFormattedDateString)
-                //     let parsedDateStringAsRawDateObject = format.parse({
-                //         value: initialFormattedDateString,
-                //         type: format.Type.DATE,
-                //         timezone: format.Timezone.AMERICA_MEXICO_CITY
-                //     });
-
-                //     let initDate = parsedDateStringAsRawDateObject.getDate();
-                //     let todayMounth = day.getDate();
-                //     log.debug('initDate mounth', initDate)
-                //     log.debug('todayMounth mounth', todayMounth)
-                //     if (initDate == todayMounth) {
-                //         return true;
-                //     }
-                //     break;
-            }
-
-        }
-
-        //Este tiene la especial de ser para aviso semanal, ya que si la semana no se encuentra hoy pero mañana si, se tiene que crear
-        const validServiceAviso = (type, weeks, date, frequency) => {
-            let day = new Date();
-
-            switch (type) {
-                //Dias
-                case "1":
-                    let days = (day.getDay() == 0) ? 7 : day.getDay();
-                    if (weeks.includes(days)) {
-                        return true;
-                    }
-                    break;
-                //Semanal
-                case "2":
-                    let week = (day.getDay() == 0) ? 7 : day.getDay();
-                    let nextWeek = (week == 7) ? 1 : week + 1;
-                    let initWeek = getWeek(date);
-                    let today = getWeek(day);
-                    log.debug('initWeek', initWeek);
-                    log.debug('today', today);
-                    let resultMultiple = isMultiple(initWeek, today, frequency);
-                    log.debug('resultMultiple', resultMultiple)
-                    if ((weeks.includes(week) || weeks.includes(nextWeek)) && resultMultiple) {
-                        return true;
-                    }
-                    break;
-                //Mensual
-                case "3":
-                    let initialFormattedDateString = date;
-                    //log.debug('initialFormattedDateString', initialFormattedDateString)
-                    let parsedDateStringAsRawDateObject = format.parse({
-                        value: initialFormattedDateString,
-                        type: format.Type.DATE,
-                        timezone: format.Timezone.AMERICA_MEXICO_CITY
-                    });
-
-                    let initDate = parsedDateStringAsRawDateObject.getDate();
-                    let todayMounth = day.getDate();
-                    log.debug('initDate mounth', initDate)
-                    log.debug('todayMounth mounth', todayMounth)
-                    if (initDate == todayMounth) {
-                        return true;
-                    }
-                    break;
-            }
-
-        }
-
-
         //Nueva validacion para el caso de diario, semanal y mensual        
         const validServiceAll = (customer, type, weeks, dates) => {
-            let date = new Date();
+            let dateSetHours = new Date().setHours('0', '0', '0', '0');
+            let date = new Date(dateSetHours);
             log.debug('data customer', customer);
             log.debug('date actual', date);
             let weeksConfigureCustomer = customer.values.week;
@@ -928,14 +974,15 @@ define(['N/format', 'N/record', 'N/search'],
             //log.debug('netDateTest', netDateTest)
 
             switch (type) {
-                //Dias
+                //Meses
                 case "4":
                     //Primero obtenemos la frecuencia
                     let frecuenciOfMounth = Number(customer.values['custrecord_ptg_cada.Address']) * 30;
+                    frecuenciOfMounth--;
                     let addMonthsAtDate = new Date(lastServiceDate.setDate(lastServiceDate.getDate() + frecuenciOfMounth));
                     log.debug('addMonthsAtDate', addMonthsAtDate);
 
-                    if (dayOfToday == addMonthsAtDate.getDate()) {
+                    if (date.getTime() == addMonthsAtDate.getTime()) {
                         log.debug('entro', 'ya pasaron los meses');
 
                         //Toca validar que toca trabajar en esta semana y que no es día festivo
@@ -951,17 +998,17 @@ define(['N/format', 'N/record', 'N/search'],
                         customer.values.idFieldDate = 'custrecord_ptg_fecha_inicio_servicio';
 
                     }
-
                     break;
 
                 case "1":
                     //Solo se le suman días a la ultima de fecha de servicio
                     let addDaysFrecuenci = Number(customer.values['custrecord_ptg_cada.Address']);
+                    addDaysFrecuenci--;
                     let addDaysAtDate = new Date(lastServiceDate.setDate(lastServiceDate.getDate() + addDaysFrecuenci));
 
                     log.debug('addDaysAtDate', addDaysAtDate);
-                    //Validamos que ya paso la frecuencia del ultimo servicio con respecto a la fecha actual
-                    if (dayOfToday == addDaysAtDate.getDate()) {
+                    //Validamos que ya paso la frecuencia del ultimo servicio con respecto a la fecha actual                    
+                    if (date.getTime() == addDaysAtDate.getTime()) {
                         log.debug('entro', 'ya pasaron los días');
 
                         //Toca validar que toca trabajar en esta semana y que no es día festivo
@@ -982,11 +1029,13 @@ define(['N/format', 'N/record', 'N/search'],
                 case "2":
                     //El caso del semanal, es solo agregar las semanas a la ultima fecha del servico 
                     let frecuenciOfWeek = Number(customer.values['custrecord_ptg_cada.Address']) * 7;
+                    frecuenciOfWeek--;
+                    log.debug('frecuenciOfWeek', frecuenciOfWeek)
                     let addWeeksAtDate = new Date(lastServiceDate.setDate(lastServiceDate.getDate() + frecuenciOfWeek));
 
                     log.debug('addWeeksAtDate', addWeeksAtDate);
 
-                    if (dayOfToday == addWeeksAtDate.getDate()) {
+                    if (date.getTime() == addWeeksAtDate.getTime()) {
                         log.debug('entro', 'ya pasaron las semanas');
 
                         //Toca validar que toca trabajar en esta semana y que no es día festivo
@@ -1001,7 +1050,7 @@ define(['N/format', 'N/record', 'N/search'],
                         });;
                         customer.values.idFieldDate = 'custrecord_ptg_fecha_inicio_servicio';
 
-                    }                  
+                    }
 
                     break;
                 //Semana
@@ -1033,13 +1082,11 @@ define(['N/format', 'N/record', 'N/search'],
                         });;
                         customer.values.idFieldDate = 'custrecord_ptg_fecha_inicio_servicio';
                     }
-                
                     break;
 
                 case "5":
                     //Validar primero si le toca domingo y que si es la fecha de hoy para devolver la fecha del
                     //servicio        
-
                     if (dayOfToday == lastServiceDate.getDate()) {
                         log.debug('entro en el mensual', 'un día en especial del mes');
                         let isSunday = validSundayandHolidays(date, customer);
@@ -1070,7 +1117,114 @@ define(['N/format', 'N/record', 'N/search'],
                             timezone: format.Timezone.AMERICA_MEXICO_CITY
                         });;
                         customer.values.idFieldDate = 'custrecord_ptg_fecha_inicio_servicio';
-                    }                 
+                    }
+                    break;
+
+
+            }
+
+            return makeService;
+        }
+
+        //New function to get date if exist services       
+        const getDateOfExist = (customer, type, weeks, dates) => {
+            let dateSetHours = new Date().setHours('0', '0', '0', '0');
+            let date = new Date(dateSetHours);
+            let weeksConfigureCustomer = customer.values.week;
+            let dayOfToday = date.getDate();
+            let weekOfToday = date.getDay();
+            let makeService = false;
+            let lastServiceDate;
+            if (!!customer.values["custrecord_ptg_fecha_inicio_servicio.Address"]) {
+                lastServiceDate = format.parse({
+                    value: customer.values["custrecord_ptg_fecha_inicio_servicio.Address"],
+                    type: format.Type.DATE,
+                    timezone: format.Timezone.AMERICA_MEXICO_CITY
+                });
+            }
+
+            let isSunday = '';
+
+            switch (type) {
+                //Meses
+                case "4":
+                    //Primero obtenemos la frecuencia
+                    let frecuenciOfMounth = Number(customer.values['custrecord_ptg_cada.Address']) * 30;
+                    frecuenciOfMounth--;
+                    let addMonthsAtDate = new Date(lastServiceDate.setDate(lastServiceDate.getDate() + frecuenciOfMounth));
+                    log.debug('addMonthsAtDate', addMonthsAtDate);
+
+                    //Toca validar que toca trabajar en esta semana y que no es día festivo
+                    isSunday = validSundayandHolidays(addMonthsAtDate, customer);
+                    log.debug('validSundayandHolidays', isSunday);
+                    makeService = true;
+                    customer.values.exceptDate = isSunday;
+                    customer.values.dateToUpdate = format.format({
+                        value: addMonthsAtDate,
+                        type: format.Type.DATE,
+                        timezone: format.Timezone.AMERICA_MEXICO_CITY
+                    });;
+                    customer.values.idFieldDate = 'custrecord_ptg_fecha_inicio_servicio';
+
+
+                    break;
+
+                case "1":
+                    //Solo se le suman días a la ultima de fecha de servicio
+                    let addDaysFrecuenci = Number(customer.values['custrecord_ptg_cada.Address']);
+                    addDaysFrecuenci--;
+                    let addDaysAtDate = new Date(lastServiceDate.setDate(lastServiceDate.getDate() + addDaysFrecuenci));
+                    log.debug('addDaysAtDate', addDaysAtDate);
+                    //Toca validar que toca trabajar en esta semana y que no es día festivo
+                    isSunday = validSundayandHolidays(addDaysAtDate, customer);
+                    log.debug('validSundayandHolidays', isSunday);
+                    makeService = true;
+                    customer.values.exceptDate = isSunday;
+                    customer.values.dateToUpdate = format.format({
+                        value: addDaysAtDate,
+                        type: format.Type.DATE,
+                        timezone: format.Timezone.AMERICA_MEXICO_CITY
+                    });;
+                    customer.values.idFieldDate = 'custrecord_ptg_fecha_inicio_servicio';
+
+                    break;
+                //Semanal
+                case "2":
+                    //El caso del semanal, es solo agregar las semanas a la ultima fecha del servico 
+                    let frecuenciOfWeek = Number(customer.values['custrecord_ptg_cada.Address']) * 7;
+                    frecuenciOfWeek--;
+                    let addWeeksAtDate = new Date(lastServiceDate.setDate(lastServiceDate.getDate() + frecuenciOfWeek));
+                    log.debug('addWeeksAtDate', addWeeksAtDate);
+
+                    isSunday = validSundayandHolidays(addWeeksAtDate, customer);
+                    log.debug('validSundayandHolidays', isSunday);
+                    makeService = true;
+                    customer.values.exceptDate = isSunday;
+                    customer.values.dateToUpdate = format.format({
+                        value: addWeeksAtDate,
+                        type: format.Type.DATE,
+                        timezone: format.Timezone.AMERICA_MEXICO_CITY
+                    });;
+                    customer.values.idFieldDate = 'custrecord_ptg_fecha_inicio_servicio';
+
+                    break;
+                case "5":
+                    //Validar primero si le toca domingo y que si es la fecha de hoy para devolver la fecha del
+                    //servicio        
+
+                    if (dayOfToday == lastServiceDate.getDate()) {
+                        log.debug('entro en el mensual', 'un día en especial del mes');
+                        isSunday = validSundayandHolidays(date, customer);
+                        log.debug('validSundayandHolidays', isSunday);
+                        makeService = true;
+                        customer.values.exceptDate = isSunday;
+                        customer.values.dateToUpdate = format.format({
+                            value: date,
+                            type: format.Type.DATE,
+                            timezone: format.Timezone.AMERICA_MEXICO_CITY
+                        });
+                        customer.values.idFieldDate = 'custrecord_ptg_fecha_inicio_servicio';
+                    }
                     break;
 
 
@@ -1091,31 +1245,71 @@ define(['N/format', 'N/record', 'N/search'],
             //Ahora buscamos los días de la semana que no trabajan
             let locationSearchObj = search.create({
                 type: "location",
-                filters:
-                    [
-                        ["internalid", "anyof", idLocation]
-                    ],
-                columns:
-                    [
-                        search.createColumn({ name: "custrecord_ptg_no_labora_domingo", label: "PTG - NO LABORA EL DOMINGO" }),
-                        search.createColumn({ name: "custrecord_ptg_no_labora_lunes", label: "PTG - NO LABORA EL LUNES" }),
-                        search.createColumn({ name: "custrecord_ptg_no_labora_martes", label: "PTG - NO LABORA EL MARTES" }),
-                        search.createColumn({ name: "custrecord_ptg_no_labora_miercoles", label: "PTG - NO LABORA EL MIERCOLES" }),
-                        search.createColumn({ name: "custrecord_ptg_no_labora_jueves", label: "PTG - NO LABORA EL JUEVES" }),
-                        search.createColumn({ name: "custrecord_ptg_no_labora_viernes", label: "PTG - NO LABORA EL VIERNES" }),
-                        search.createColumn({ name: "custrecord_ptg_no_labora_sabado", label: "PTG - NO LABORA EL SABADO" })
-                    ]
+                filters: [
+                    ["internalid", "anyof", idLocation]
+                ],
+                columns: [
+                    search.createColumn({
+                        name: "custrecord_ptg_no_labora_domingo",
+                        label: "PTG - NO LABORA EL DOMINGO"
+                    }),
+                    search.createColumn({
+                        name: "custrecord_ptg_no_labora_lunes",
+                        label: "PTG - NO LABORA EL LUNES"
+                    }),
+                    search.createColumn({
+                        name: "custrecord_ptg_no_labora_martes",
+                        label: "PTG - NO LABORA EL MARTES"
+                    }),
+                    search.createColumn({
+                        name: "custrecord_ptg_no_labora_miercoles",
+                        label: "PTG - NO LABORA EL MIERCOLES"
+                    }),
+                    search.createColumn({
+                        name: "custrecord_ptg_no_labora_jueves",
+                        label: "PTG - NO LABORA EL JUEVES"
+                    }),
+                    search.createColumn({
+                        name: "custrecord_ptg_no_labora_viernes",
+                        label: "PTG - NO LABORA EL VIERNES"
+                    }),
+                    search.createColumn({
+                        name: "custrecord_ptg_no_labora_sabado",
+                        label: "PTG - NO LABORA EL SABADO"
+                    })
+                ]
             });
             let arrayWeek = [];
             locationSearchObj.run().each(function (result) {
                 // .run().each has a limit of 4,000 results
-                let sunday = result.getValue({ name: "custrecord_ptg_no_labora_domingo", label: "PTG - NO LABORA EL DOMINGO" });
-                let monday = result.getValue({ name: "custrecord_ptg_no_labora_lunes", label: "PTG - NO LABORA EL LUNES" });
-                let tuesday = result.getValue({ name: "custrecord_ptg_no_labora_martes", label: "PTG - NO LABORA EL MARTES" });
-                let wednesday = result.getValue({ name: "custrecord_ptg_no_labora_miercoles", label: "PTG - NO LABORA EL MIERCOLES" });
-                let thursday = result.getValue({ name: "custrecord_ptg_no_labora_jueves", label: "PTG - NO LABORA EL JUEVES" });
-                let friday = result.getValue({ name: "custrecord_ptg_no_labora_viernes", label: "PTG - NO LABORA EL VIERNES" });
-                let saturday = result.getValue({ name: "custrecord_ptg_no_labora_sabado", label: "PTG - NO LABORA EL SABADO" });
+                let sunday = result.getValue({
+                    name: "custrecord_ptg_no_labora_domingo",
+                    label: "PTG - NO LABORA EL DOMINGO"
+                });
+                let monday = result.getValue({
+                    name: "custrecord_ptg_no_labora_lunes",
+                    label: "PTG - NO LABORA EL LUNES"
+                });
+                let tuesday = result.getValue({
+                    name: "custrecord_ptg_no_labora_martes",
+                    label: "PTG - NO LABORA EL MARTES"
+                });
+                let wednesday = result.getValue({
+                    name: "custrecord_ptg_no_labora_miercoles",
+                    label: "PTG - NO LABORA EL MIERCOLES"
+                });
+                let thursday = result.getValue({
+                    name: "custrecord_ptg_no_labora_jueves",
+                    label: "PTG - NO LABORA EL JUEVES"
+                });
+                let friday = result.getValue({
+                    name: "custrecord_ptg_no_labora_viernes",
+                    label: "PTG - NO LABORA EL VIERNES"
+                });
+                let saturday = result.getValue({
+                    name: "custrecord_ptg_no_labora_sabado",
+                    label: "PTG - NO LABORA EL SABADO"
+                });
 
                 arrayWeek.push(sunday, monday, tuesday, wednesday, thursday, friday, saturday)
                 return true;
@@ -1126,19 +1320,22 @@ define(['N/format', 'N/record', 'N/search'],
             //obtenemos las fechas que no trabajan
             let customrecord_ptg_dias_feriados_no_laboraSearchObj = search.create({
                 type: "customrecord_ptg_dias_feriados_no_labora",
-                filters:
-                    [
-                    ],
-                columns:
-                    [
-                        search.createColumn({ name: "custrecord_ptg_dia_feriado_no_laboral", label: "PTG - DIA FERIADO NO LABORAL" })
-                    ]
+                filters: [],
+                columns: [
+                    search.createColumn({
+                        name: "custrecord_ptg_dia_feriado_no_laboral",
+                        label: "PTG - DIA FERIADO NO LABORAL"
+                    })
+                ]
             });
 
             let daysNotWork = [];
             customrecord_ptg_dias_feriados_no_laboraSearchObj.run().each(function (result) {
                 // .run().each has a limit of 4,000 results
-                let days = result.getValue({ name: "custrecord_ptg_dia_feriado_no_laboral", label: "PTG - DIA FERIADO NO LABORAL" });
+                let days = result.getValue({
+                    name: "custrecord_ptg_dia_feriado_no_laboral",
+                    label: "PTG - DIA FERIADO NO LABORAL"
+                });
                 daysNotWork.push(days);
                 return true;
             });
@@ -1223,48 +1420,6 @@ define(['N/format', 'N/record', 'N/search'],
             return dayToInsert;
         }
 
-        //Validar si va a tener ruta matutina o vespertina
-        function getTimeInt(time) {
-            let timeAux = time.split(" "),
-                hour = timeAux[0].split(":")[0];
-
-            if (timeAux[1].toLowerCase() == "pm" || timeAux[1].toLowerCase() == "p.m") {
-                if (hour != "12") {
-                    hour = parseInt(hour) + 12;
-                }
-            } else if (timeAux[1].toLowerCase() == "am" || timeAux[1].toLowerCase() == "a.m") {
-                if (hour == "12") {
-                    hour = 0;
-                }
-            }
-            return parseInt(hour);
-        }
-
-        const getWeek = (date) => {
-            let initialFormattedDateString = date;
-            log.debug('initialFormattedDateString', initialFormattedDateString)
-            let parsedDateStringAsRawDateObject = format.parse({
-                value: initialFormattedDateString,
-                type: format.Type.DATE,
-                timezone: format.Timezone.AMERICA_MEXICO_CITY
-            });
-            //log.debug('date created transform', parsedDateStringAsRawDateObject)
-            // log.debug('date created get year', parsedDateStringAsRawDateObject.getFullYear())
-            let oneJan = new Date(parsedDateStringAsRawDateObject.getFullYear(), 0, 1);
-            let numberOfDays = Math.floor((parsedDateStringAsRawDateObject - oneJan) / (24 * 60 * 60 * 1000));
-            let resultWeek = Math.ceil((parsedDateStringAsRawDateObject.getDay() + 1 + numberOfDays) / 7);
-            log.debug('result week of year', resultWeek)
-            return resultWeek;
-        }
-
-        const isMultiple = (initWeek, today, frequency) => {
-            let result = false;
-            if ((today - initWeek) % frequency == 0) {
-                result = true;
-            }
-            return result;
-        }
-
         //Funciones para crear clindros
         const makeOPCilindro = (typeService, infoCustomer, contactType) => {
             log.debug('makeOPCilindro', 'entro')
@@ -1283,6 +1438,7 @@ define(['N/format', 'N/record', 'N/search'],
                     //Obtenemos el precio por zona
                     let priceZoneValue = (!!infoCustomer.values['custrecord_ptg_colonia_ruta.Address']) ? getPriceZone(infoCustomer.values['custrecord_ptg_colonia_ruta.Address'].value, Number(typeService)) : 0;
                     let territory = (!!infoCustomer.values['custrecord_ptg_colonia_ruta.Address']) ? getTerritory(infoCustomer.values['custrecord_ptg_colonia_ruta.Address'].value) : 0;
+                    let zone = (!!infoCustomer.values['custrecord_ptg_colonia_ruta.Address']) ? getSaleZone(infoCustomer.values['custrecord_ptg_colonia_ruta.Address'].value) : "";
                     log.debug('priceZoneValue Cilindro', priceZoneValue)
                     //Obtenemos la cantidad que tiene el articulo de cilindro
                     let itemContent = search.lookupFields({
@@ -1308,32 +1464,25 @@ define(['N/format', 'N/record', 'N/search'],
                     //opportunityCilindro.setValue('probability', 75);
                     opportunityCilindro.setValue('custbody_ptg_tipo_servicio', 1);
                     opportunityCilindro.setValue('custbody_ptg_id_direccion_envio', infoCustomer.values['addressinternalid.Address']);
+                    opportunityCilindro.setValue('custbody_ptg_id_direccion_envio_cc', infoCustomer.values['addressinternalid.Address']);
                     opportunityCilindro.setValue('custbody_ptg_precio_articulo_zona', priceZoneValue);
                     opportunityCilindro.setText('custbody_ptg_entre_las', infoCustomer.values['custrecord_ptg_entre_las.Address']);
                     opportunityCilindro.setText('custbody_ptg_y_las', infoCustomer.values['custrecord_ptg_y_las.Address']);
                     opportunityCilindro.setValue('custbody_ptg_zonadeprecioop_', territory);
-                    opportunityCilindro.setValue('custbody_ptg_origen_servicio', 4);                    
+                    opportunityCilindro.setValue('custbody_ptg_zona_venta_cc', zone);
+                    opportunityCilindro.setValue('custbody_ptg_origen_servicio', 4);
                     opportunityCilindro.setValue('custbody_ptg_planta_relacionada', infoCustomer.values['custentity_ptg_plantarelacionada_'].value);
-                    opportunityCilindro.setValue('custbody_ptg_etiqueta_direccion_envio', infoCustomer.values['addresslabel']);                    
+                    opportunityCilindro.setValue('custbody_ptg_etiqueta_direccion_envio', infoCustomer.values['addresslabel']);
                     if (contactType == 4) {
                         opportunityCilindro.setValue('custbody_ptg_oportunidad_programado', true);
                     }
-                    if (infoCustomer.values.isMoorning) {
-                        opportunityCilindro.setValue('custbody_ptg_ruta_asignada', infoCustomer.values['custrecord_ptg_ruta_asignada.Address'].text);
-                        opportunityCilindro.setValue('custbody_ptg_turno_equipo', 1);
-                    } else {
-                        opportunityCilindro.setValue('custbody_ptg_ruta_asignada', (infoCustomer.values['custrecord_ptg_ruta_asignada2.Address'].text || infoCustomer.values['custrecord_ptg_ruta_asignada.Address'].text));
-                        opportunityCilindro.setValue('custbody_ptg_turno_equipo', 2);
-                    }
+                    opportunityCilindro.setValue('custbody_ptg_ruta_asignada', infoCustomer.values['custrecord_ptg_ruta_asignada.Address'].text);
                     //Agregar la direccion de envio
                     opportunityCilindro.setValue('shipaddresslist', Number(infoCustomer.values['addressinternalid.Address']));
                     (getWeek == 0) ? getWeek = 7 : getWeek = getWeek;
                     let day = [getWeek];
-                    //log.debug('day of week', day);
-                    // opportunityCilindro.setValue('custbody_ptg_dia_semana', day);
-                    //opportunityCilindro.setValue('subsidiary', infoCustomer.values.subsidiary.value);
+                    //log.debug('day of week', day);                   
                     let today = new Date();
-                    //today = today.setDate(today.getDate()+1);
                     today.setDate(today.getDate() + 1);
                     //og.debug('today add', today)
                     opportunityCilindro.setText('expectedclosedate', infoCustomer.values['exceptDate']);
@@ -1341,30 +1490,58 @@ define(['N/format', 'N/record', 'N/search'],
                     //Validamos que tenga una capacidad del cilindro y que tenga configurado un precio de zona
                     if (!!itemContent['custitem_ptg_capacidadcilindro_'] && Number(priceZoneValue) > 0) {
                         //opportunityCilindro.insertLine({ sublistId: 'item', line: 0 });
-                        opportunityCilindro.selectNewLine({ sublistId: 'item' });
-                        opportunityCilindro.setCurrentSublistValue({ sublistId: 'item', fieldId: 'item', value: Number(infoCustomer.values["custrecord_ptg_articulo_frecuente.Address"].value) });
-                        opportunityCilindro.setCurrentSublistValue({ sublistId: 'item', fieldId: 'quantity', value: Number(infoCustomer.values["custrecord_ptg_capacidad_art.Address"]) });
+                        opportunityCilindro.selectNewLine({
+                            sublistId: 'item'
+                        });
+                        opportunityCilindro.setCurrentSublistValue({
+                            sublistId: 'item',
+                            fieldId: 'item',
+                            value: Number(infoCustomer.values["custrecord_ptg_articulo_frecuente.Address"].value)
+                        });
+                        opportunityCilindro.setCurrentSublistValue({
+                            sublistId: 'item',
+                            fieldId: 'quantity',
+                            value: Number(infoCustomer.values["custrecord_ptg_capacidad_art.Address"])
+                        });
                         let finalRate = Number(itemContent['custitem_ptg_capacidadcilindro_']) * Number(priceZoneValue);
-                        opportunityCilindro.setCurrentSublistValue({ sublistId: 'item', fieldId: 'rate', value: finalRate.toFixed(6) });
+                        opportunityCilindro.setCurrentSublistValue({
+                            sublistId: 'item',
+                            fieldId: 'rate',
+                            value: finalRate.toFixed(6)
+                        });
                         // let finalAmount = (Number(infoCustomer.values.custentity_ptg_cantidad_frecuente_lt_cil) * Number(itemContent['custitem_ptg_capacidadcilindro_'])) * Number(priceZoneValue);
                         // opportunityCilindro.setCurrentSublistValue({ sublistId: 'item', fieldId: 'amount', value: finalAmount });
-                        opportunityCilindro.commitLine({ sublistId: 'item' });                        
+                        opportunityCilindro.commitLine({
+                            sublistId: 'item'
+                        });
                         let totalTransaction = (finalRate * Number(infoCustomer.values["custrecord_ptg_capacidad_art.Address"])) * 1.16;
                         //Agregamos linea de descuento
-                        if(!!infoCustomer.values['custentity_ptg_tipo_descuento'] && !!infoCustomer.values['custentity_ptg_tipo_descuento'].value){
+                        if (!!infoCustomer.values['custentity_ptg_tipo_descuento'] && !!infoCustomer.values['custentity_ptg_tipo_descuento'].value) {
                             let factorConversion = getFactorConversion(infoCustomer.values['custrecord_ptg_colonia_ruta.Address'].value) || '';
-                            if(!!factorConversion){
+                            if (!!infoCustomer.values['custentity_ptg_descuento_por_kilo_']) {
                                 log.debug('cantidad de cilindro', Number(infoCustomer.values["custrecord_ptg_capacidad_art.Address"]));
                                 log.debug('total transaction', totalTransaction)
-                                let totalCilindro = (Number(itemContent['custitem_ptg_capacidadcilindro_']) * Number(infoCustomer.values["custrecord_ptg_capacidad_art.Address"])) / factorConversion; 
-                                let finalDiscount = (totalCilindro * Number(infoCustomer.values['custentity_ptg_descuento_asignar'])) / 1.16;
-                                opportunityCilindro.selectNewLine({ sublistId: 'item' });
-                                opportunityCilindro.setCurrentSublistValue({ sublistId: 'item', fieldId: 'item', value: 4528 });//prd 4217                                                                                             
-                                opportunityCilindro.setCurrentSublistValue({ sublistId: 'item', fieldId: 'rate', value: (finalDiscount * -1).toFixed(6) });                                
-                                opportunityCilindro.commitLine({ sublistId: 'item' });   
+                                let totalCilindro = (Number(itemContent['custitem_ptg_capacidadcilindro_']) * Number(infoCustomer.values["custrecord_ptg_capacidad_art.Address"]));
+                                let finalDiscount = (totalCilindro * Number(infoCustomer.values['custentity_ptg_descuento_por_kilo_'])) / 1.16;
+                                opportunityCilindro.selectNewLine({
+                                    sublistId: 'item'
+                                });
+                                opportunityCilindro.setCurrentSublistValue({
+                                    sublistId: 'item',
+                                    fieldId: 'item',
+                                    value: 4528
+                                });
+                                opportunityCilindro.setCurrentSublistValue({
+                                    sublistId: 'item',
+                                    fieldId: 'rate',
+                                    value: (finalDiscount * -1).toFixed(6)
+                                });
+                                opportunityCilindro.commitLine({
+                                    sublistId: 'item'
+                                });
                                 log.debug('final Discount con iva', (finalDiscount * 1.16));
                                 totalTransaction -= (finalDiscount * 1.16)
-                            }                                                        
+                            }
                         }
                         //
                         let isOkCreditOrContract;
@@ -1438,12 +1615,30 @@ define(['N/format', 'N/record', 'N/search'],
                                 fieldId: infoCustomer.values['idFieldDate'],
                                 text: infoCustomer.values['dateToUpdate']
                             });
+
+                            addressSubrecord.setValue({
+                                fieldId: 'custrecord_drt_pm_estado',
+                                value: 513
+                            });
+
+                            addressSubrecord.setValue({
+                                fieldId: 'custrecord_drt_pm_ciudad',
+                                value: 584
+                            });
+
+                            addressSubrecord.setValue({
+                                fieldId: 'custrecord_disa_zona_pm',
+                                value: 595
+                            });
                         }
 
                         customerRecord.commitLine({
                             sublistId: "addressbook"
                         });
-                        let idUpdateDate = customerRecord.save();
+                        let idUpdateDate = customerRecord.save({
+                            enableSourcing: true,
+                            ignoreMandatoryFields: true
+                        });
                         log.debug('se actualizo la fecha de la direcion', idUpdateDate)
 
                         //}
@@ -1457,6 +1652,7 @@ define(['N/format', 'N/record', 'N/search'],
                     //Obtenemos el precio por zona
                     let priceZoneValue = (!!infoCustomer.values['custrecord_ptg_colonia_ruta.Address']) ? getPriceZone(infoCustomer.values['custrecord_ptg_colonia_ruta.Address'].value) : 0;
                     let territory = (!!infoCustomer.values['custrecord_ptg_colonia_ruta.Address']) ? getTerritory(infoCustomer.values['custrecord_ptg_colonia_ruta.Address'].value) : 0;
+                    let zone = (!!infoCustomer.values['custrecord_ptg_colonia_ruta.Address']) ? getSaleZone(infoCustomer.values['custrecord_ptg_colonia_ruta.Address'].value) : "";
                     log.debug('priceZoneValue Cilindro', priceZoneValue)
                     //Obtenemos la cantidad que tiene el articulo de cilindro
                     let itemContent = search.lookupFields({
@@ -1480,27 +1676,21 @@ define(['N/format', 'N/record', 'N/search'],
                     //opportunityCilindro.setValue('probability', 75);
                     opportunityCilindro.setValue('custbody_ptg_tipo_servicio', 1);
                     opportunityCilindro.setValue('custbody_ptg_id_direccion_envio', infoCustomer.values['addressinternalid.Address']);
+                    opportunityCilindro.setValue('custbody_ptg_id_direccion_envio_cc', infoCustomer.values['addressinternalid.Address']);
                     opportunityCilindro.setValue('custbody_ptg_precio_articulo_zona', priceZoneValue);
                     opportunityCilindro.setText('custbody_ptg_entre_las', infoCustomer.values['custrecord_ptg_entre_las.Address']);
                     opportunityCilindro.setText('custbody_ptg_y_las', infoCustomer.values['custrecord_ptg_y_las.Address']);
                     opportunityCilindro.setValue('custbody_ptg_zonadeprecioop_', territory);
-                    opportunityCilindro.setValue('custbody_ptg_origen_servicio', 4);                    
+                    opportunityCilindro.setValue('custbody_ptg_zona_venta_cc', zone);
+                    opportunityCilindro.setValue('custbody_ptg_origen_servicio', 4);
                     opportunityCilindro.setValue('custbody_ptg_planta_relacionada', infoCustomer.values['custentity_ptg_plantarelacionada_'].value);
-                    opportunityCilindro.setValue('custbody_ptg_etiqueta_direccion_envio', infoCustomer.values['addresslabel']);   
-                    if (infoCustomer.values.isMoorning) {
-                        opportunityCilindro.setValue('custbody_ptg_ruta_asignada', infoCustomer.values['custrecord_ptg_ruta_asignada.Address'].text);
-                        opportunityCilindro.setValue('custbody_ptg_turno_equipo', 1);
-                    } else {
-                        opportunityCilindro.setValue('custbody_ptg_ruta_asignada', (infoCustomer.values['custrecord_ptg_ruta_asignada2.Address'].text || infoCustomer.values['custrecord_ptg_ruta_asignada.Address'].text));
-                        opportunityCilindro.setValue('custbody_ptg_turno_equipo', 2);
-                    }
+                    opportunityCilindro.setValue('custbody_ptg_etiqueta_direccion_envio', infoCustomer.values['addresslabel']);
+                    opportunityCilindro.setValue('custbody_ptg_ruta_asignada', infoCustomer.values['custrecord_ptg_ruta_asignada.Address'].text);
                     //Agregar la direccion de envio
                     opportunityCilindro.setValue('shipaddresslist', Number(infoCustomer.values['addressinternalid.Address']));
                     (getWeek == 0) ? getWeek = 7 : getWeek = getWeek;
                     let day = [getWeek];
-                    //log.debug('day of week', day);
-                    // opportunityCilindro.setValue('custbody_ptg_dia_semana', day);
-                    //opportunityCilindro.setValue('subsidiary', infoCustomer.values.subsidiary.value);
+                    //log.debug('day of week', day);                   
                     let today = new Date();
                     //today = today.setDate(today.getDate()+1);
                     today.setDate(today.getDate() + 1);
@@ -1510,30 +1700,58 @@ define(['N/format', 'N/record', 'N/search'],
                     //Validamos que tenga una capacidad del cilindro y que tenga configurado un precio de zona
                     if (!!itemContent['custitem_ptg_capacidadcilindro_'] && Number(priceZoneValue) > 0) {
                         //opportunityCilindro.insertLine({ sublistId: 'item', line: 0 });
-                        opportunityCilindro.selectNewLine({ sublistId: 'item' });
-                        opportunityCilindro.setCurrentSublistValue({ sublistId: 'item', fieldId: 'item', value: Number(infoCustomer.values["custrecord_ptg_articulo_frecuente.Address"].value) });
-                        opportunityCilindro.setCurrentSublistValue({ sublistId: 'item', fieldId: 'quantity', value: Number(infoCustomer.values["custrecord_ptg_capacidad_art.Address"]) });
+                        opportunityCilindro.selectNewLine({
+                            sublistId: 'item'
+                        });
+                        opportunityCilindro.setCurrentSublistValue({
+                            sublistId: 'item',
+                            fieldId: 'item',
+                            value: Number(infoCustomer.values["custrecord_ptg_articulo_frecuente.Address"].value)
+                        });
+                        opportunityCilindro.setCurrentSublistValue({
+                            sublistId: 'item',
+                            fieldId: 'quantity',
+                            value: Number(infoCustomer.values["custrecord_ptg_capacidad_art.Address"])
+                        });
                         let finalRate = Number(itemContent['custitem_ptg_capacidadcilindro_']) * Number(priceZoneValue);
-                        opportunityCilindro.setCurrentSublistValue({ sublistId: 'item', fieldId: 'rate', value: finalRate.toFixed(6) });
+                        opportunityCilindro.setCurrentSublistValue({
+                            sublistId: 'item',
+                            fieldId: 'rate',
+                            value: finalRate.toFixed(6)
+                        });
                         // let finalAmount = (Number(infoCustomer.values.custentity_ptg_cantidad_frecuente_lt_cil) * Number(itemContent['custitem_ptg_capacidadcilindro_'])) * Number(priceZoneValue);
                         // opportunityCilindro.setCurrentSublistValue({ sublistId: 'item', fieldId: 'amount', value: finalAmount });
-                        opportunityCilindro.commitLine({ sublistId: 'item' });
+                        opportunityCilindro.commitLine({
+                            sublistId: 'item'
+                        });
                         let totalTransaction = (finalRate * Number(infoCustomer.values["custrecord_ptg_capacidad_art.Address"])) * 1.16;
                         //Agregamos linea de descuento
-                        if(!!infoCustomer.values['custentity_ptg_tipo_descuento'] && !!infoCustomer.values['custentity_ptg_tipo_descuento'].value){
+                        if (!!infoCustomer.values['custentity_ptg_tipo_descuento'] && !!infoCustomer.values['custentity_ptg_tipo_descuento'].value) {
                             let factorConversion = getFactorConversion(infoCustomer.values['custrecord_ptg_colonia_ruta.Address'].value) || '';
-                            if(!!factorConversion){
+                            if (!!infoCustomer.values['custentity_ptg_descuento_por_kilo_']) {
                                 log.debug('cantidad de cilindro', Number(infoCustomer.values["custrecord_ptg_capacidad_art.Address"]));
                                 log.debug('total transaction', totalTransaction)
-                                let totalCilindro = (Number(itemContent['custitem_ptg_capacidadcilindro_']) * Number(infoCustomer.values["custrecord_ptg_capacidad_art.Address"])) / factorConversion; 
-                                let finalDiscount = (totalCilindro * Number(infoCustomer.values['custentity_ptg_descuento_asignar'])) / 1.16;
-                                opportunityCilindro.selectNewLine({ sublistId: 'item' });
-                                opportunityCilindro.setCurrentSublistValue({ sublistId: 'item', fieldId: 'item', value: 4528 });//prd 4217                                                                
-                                opportunityCilindro.setCurrentSublistValue({ sublistId: 'item', fieldId: 'rate', value: (finalDiscount * -1).toFixed(6) });                                
-                                opportunityCilindro.commitLine({ sublistId: 'item' });                                                                   
+                                let totalCilindro = (Number(itemContent['custitem_ptg_capacidadcilindro_']) * Number(infoCustomer.values["custrecord_ptg_capacidad_art.Address"]));
+                                let finalDiscount = (totalCilindro * Number(infoCustomer.values['custentity_ptg_descuento_por_kilo_'])) / 1.16;
+                                opportunityCilindro.selectNewLine({
+                                    sublistId: 'item'
+                                });
+                                opportunityCilindro.setCurrentSublistValue({
+                                    sublistId: 'item',
+                                    fieldId: 'item',
+                                    value: 4528
+                                });
+                                opportunityCilindro.setCurrentSublistValue({
+                                    sublistId: 'item',
+                                    fieldId: 'rate',
+                                    value: (finalDiscount * -1).toFixed(6)
+                                });
+                                opportunityCilindro.commitLine({
+                                    sublistId: 'item'
+                                });
                                 log.debug('final Discount con iva', (finalDiscount * 1.16));
                                 totalTransaction -= (finalDiscount * 1.16)
-                            }                                                        
+                            }
                         }
                         //
                         let isOkCreditOrContract;
@@ -1604,12 +1822,30 @@ define(['N/format', 'N/record', 'N/search'],
                                 fieldId: infoCustomer.values['idFieldDate'],
                                 text: infoCustomer.values['dateToUpdate']
                             });
+
+                            addressSubrecord.setValue({
+                                fieldId: 'custrecord_drt_pm_estado',
+                                value: 513
+                            });
+
+                            addressSubrecord.setValue({
+                                fieldId: 'custrecord_drt_pm_ciudad',
+                                value: 584
+                            });
+
+                            addressSubrecord.setValue({
+                                fieldId: 'custrecord_disa_zona_pm',
+                                value: 595
+                            });
                         }
 
                         customerRecord.commitLine({
                             sublistId: "addressbook"
                         });
-                        let idUpdateDate = customerRecord.save();
+                        let idUpdateDate = customerRecord.save({
+                            enableSourcing: true,
+                            ignoreMandatoryFields: true
+                        });
                         log.debug('se actualizo la fecha de la direcion', idUpdateDate)
 
                         //}
@@ -1685,6 +1921,7 @@ define(['N/format', 'N/record', 'N/search'],
                 if (!!infoCustomer.values['custrecord_ptg_articulo_frecuente.Address']) {
                     let priceZoneValue = (!!infoCustomer.values['custrecord_ptg_colonia_ruta.Address']) ? getPriceZone(infoCustomer.values['custrecord_ptg_colonia_ruta.Address'].value, Number(typeService)) : 0;
                     let territory = (!!infoCustomer.values['custrecord_ptg_colonia_ruta.Address']) ? getTerritory(infoCustomer.values['custrecord_ptg_colonia_ruta.Address'].value) : 0;
+                    let zone = (!!infoCustomer.values['custrecord_ptg_colonia_ruta.Address']) ? getSaleZone(infoCustomer.values['custrecord_ptg_colonia_ruta.Address'].value) : "";
                     let opportunityEstacionaria = record.create({
                         type: record.Type.OPPORTUNITY,
                         isDynamic: true
@@ -1701,11 +1938,13 @@ define(['N/format', 'N/record', 'N/search'],
                     opportunityEstacionaria.setValue('custbody_ptg_precio_articulo_zona', priceZoneValue);
                     log.debug('address id estacionario', infoCustomer.values['addressinternalid.Address'])
                     opportunityEstacionaria.setValue('custbody_ptg_id_direccion_envio', infoCustomer.values['addressinternalid.Address']);
+                    opportunityEstacionaria.setValue('custbody_ptg_id_direccion_envio_cc', infoCustomer.values['addressinternalid.Address']);
                     opportunityEstacionaria.setText('custbody_ptg_entre_las', infoCustomer.values['custrecord_ptg_entre_las.Address']);
                     opportunityEstacionaria.setText('custbody_ptg_y_las', infoCustomer.values['custrecord_ptg_y_las.Address']);
                     opportunityEstacionaria.setValue('custbody_ptg_zonadeprecioop_', territory);
-                    opportunityEstacionaria.setValue('custbody_ptg_origen_servicio', 4);                    
-                    opportunityEstacionaria.setValue('custbody_ptg_etiqueta_direccion_envio', infoCustomer.values['addresslabel']);   
+                    opportunityEstacionaria.setValue('custbody_ptg_zona_venta_cc', zone);
+                    opportunityEstacionaria.setValue('custbody_ptg_origen_servicio', 4);
+                    opportunityEstacionaria.setValue('custbody_ptg_etiqueta_direccion_envio', infoCustomer.values['addresslabel']);
                     if (contactType == 4) {
                         opportunityEstacionaria.setValue('custbody_ptg_oportunidad_programado', true);
                     }
@@ -1721,38 +1960,62 @@ define(['N/format', 'N/record', 'N/search'],
                     opportunityEstacionaria.setValue('shipaddresslist', Number(infoCustomer.values['addressinternalid.Address']));
                     (getWeek == 0) ? getWeek = 7 : getWeek = getWeek;
                     let day = [getWeek];
-                    //log.debug('day of week', day);
-                    //opportunityEstacionaria.setValue('custbody_ptg_dia_semana', day);
-                    //opportunityEstacionaria.setValue('subsidiary', infoCustomer.values.subsidiary.value);
                     let today = new Date();
-                    //today = today.setDate(today.getDate()+1);
                     today.setDate(today.getDate() + 1);
                     //log.debug('today add', today)
                     opportunityEstacionaria.setText('expectedclosedate', infoCustomer.values['exceptDate']);
 
                     if (Number(priceZoneValue) > 0) {
                         //opportunityEstacionaria.insertLine({ sublistId: 'item', line: 0 });
-                        opportunityEstacionaria.selectNewLine({ sublistId: 'item' });
-                        opportunityEstacionaria.setCurrentSublistValue({ sublistId: 'item', fieldId: 'item', value: Number(infoCustomer.values["custrecord_ptg_articulo_frecuente.Address"].value) });
-                        opportunityEstacionaria.setCurrentSublistValue({ sublistId: 'item', fieldId: 'quantity', value: Number(infoCustomer.values["custrecord_ptg_capacidad_art.Address"]) });
-                        opportunityEstacionaria.setCurrentSublistValue({ sublistId: 'item', fieldId: 'rate', value: Number(priceZoneValue) });
+                        opportunityEstacionaria.selectNewLine({
+                            sublistId: 'item'
+                        });
+                        opportunityEstacionaria.setCurrentSublistValue({
+                            sublistId: 'item',
+                            fieldId: 'item',
+                            value: Number(infoCustomer.values["custrecord_ptg_articulo_frecuente.Address"].value)
+                        });
+                        opportunityEstacionaria.setCurrentSublistValue({
+                            sublistId: 'item',
+                            fieldId: 'quantity',
+                            value: Number(infoCustomer.values["custrecord_ptg_capacidad_art.Address"])
+                        });
+                        opportunityEstacionaria.setCurrentSublistValue({
+                            sublistId: 'item',
+                            fieldId: 'rate',
+                            value: Number(priceZoneValue)
+                        });
                         // let finalAmount = Number(priceZoneValue) * Number(infoCustomer.values.custentity_ptg_cantidad_frecuente_lt_cil);
                         // opportunityEstacionaria.setCurrentSublistValue({ sublistId: 'item', fieldId: 'amount', value: finalAmount });    
                         let finalRate = Number(infoCustomer.values["custrecord_ptg_capacidad_art.Address"]) * Number(priceZoneValue)
-                        opportunityEstacionaria.commitLine({ sublistId: 'item' });
+                        opportunityEstacionaria.commitLine({
+                            sublistId: 'item'
+                        });
                         //Agregamos linea de descuento
                         let totalTransaction = finalRate * 1.16;
-                        if(!!infoCustomer.values['custentity_ptg_tipo_descuento'] && !!infoCustomer.values['custentity_ptg_tipo_descuento'].value){
+                        if (!!infoCustomer.values['custentity_ptg_tipo_descuento'] && !!infoCustomer.values['custentity_ptg_tipo_descuento'].value) {
                             let factorConversion = getFactorConversion(infoCustomer.values['custrecord_ptg_colonia_ruta.Address'].value) || '';
-                            if(!!factorConversion){                               
+                            if (!!infoCustomer.values['custentity_ptg_descuento_asignar']) {
                                 let finalDiscount = (Number(infoCustomer.values["custrecord_ptg_capacidad_art.Address"]) * Number(infoCustomer.values['custentity_ptg_descuento_asignar'])) / 1.16;
-                                opportunityEstacionaria.selectNewLine({ sublistId: 'item' });
-                                opportunityEstacionaria.setCurrentSublistValue({ sublistId: 'item', fieldId: 'item', value: 4528 });  //prd 4217                                                              
-                                opportunityEstacionaria.setCurrentSublistValue({ sublistId: 'item', fieldId: 'rate', value: (finalDiscount * -1).toFixed(6) });                                
-                                opportunityEstacionaria.commitLine({ sublistId: 'item' });   
-                                
+                                opportunityEstacionaria.selectNewLine({
+                                    sublistId: 'item'
+                                });
+                                opportunityEstacionaria.setCurrentSublistValue({
+                                    sublistId: 'item',
+                                    fieldId: 'item',
+                                    value: 4528
+                                });
+                                opportunityEstacionaria.setCurrentSublistValue({
+                                    sublistId: 'item',
+                                    fieldId: 'rate',
+                                    value: (finalDiscount * -1).toFixed(6)
+                                });
+                                opportunityEstacionaria.commitLine({
+                                    sublistId: 'item'
+                                });
+
                                 totalTransaction -= (finalDiscount * 1.16)
-                            }                                                        
+                            }
                         }
                         //
                         let isOkCreditOrContract;
@@ -1826,25 +2089,43 @@ define(['N/format', 'N/record', 'N/search'],
                                 fieldId: infoCustomer.values['idFieldDate'],
                                 text: infoCustomer.values['dateToUpdate']
                             });
+
+                            addressSubrecord.setValue({
+                                fieldId: 'custrecord_drt_pm_estado',
+                                value: 513
+                            });
+
+                            addressSubrecord.setValue({
+                                fieldId: 'custrecord_drt_pm_ciudad',
+                                value: 584
+                            });
+
+                            addressSubrecord.setValue({
+                                fieldId: 'custrecord_disa_zona_pm',
+                                value: 595
+                            });
                         }
 
                         customerRecord.commitLine({
                             sublistId: "addressbook"
                         });
-                        let idUpdateDate = customerRecord.save();
+                        let idUpdateDate = customerRecord.save({
+                            enableSourcing: true,
+                            ignoreMandatoryFields: true
+                        });
                         log.debug('se actualizo la fecha de la direcion', idUpdateDate)
 
                         // }
                     }
                 }
 
-            }
-            else if ((contactType == 4 || contactType == 2) && Number(typeService) == 4) {
+            } else if ((contactType == 4 || contactType == 2) && Number(typeService) == 4) {
                 //Mismo proceso que cilindro pero ahora con estacionario y la diferencia de momento es que no tiene configurado una capacidad por el tipo de articulo
                 //Y en este caso se utiliza el campo de segundo articulo frecuente
                 if (!!infoCustomer.values['custrecord_ptg_articulo_frecuente2.Address']) {
                     let priceZoneValue = (!!infoCustomer.values['custrecord_ptg_colonia_ruta.Address']) ? getPriceZone(infoCustomer.values['custrecord_ptg_colonia_ruta.Address'].value) : 0;
                     let territory = (!!infoCustomer.values['custrecord_ptg_colonia_ruta.Address']) ? getTerritory(infoCustomer.values['custrecord_ptg_colonia_ruta.Address'].value) : 0;
+                    let zone = (!!infoCustomer.values['custrecord_ptg_colonia_ruta.Address']) ? getSaleZone(infoCustomer.values['custrecord_ptg_colonia_ruta.Address'].value) : "";
                     let opportunityEstacionaria = record.create({
                         type: record.Type.OPPORTUNITY,
                         isDynamic: true
@@ -1861,11 +2142,13 @@ define(['N/format', 'N/record', 'N/search'],
                     opportunityEstacionaria.setValue('custbody_ptg_precio_articulo_zona', priceZoneValue);
                     log.debug('address id estacionario', infoCustomer.values['addressinternalid.Address'])
                     opportunityEstacionaria.setValue('custbody_ptg_id_direccion_envio', infoCustomer.values['addressinternalid.Address']);
+                    opportunityEstacionaria.setValue('custbody_ptg_id_direccion_envio_cc', infoCustomer.values['addressinternalid.Address']);
                     opportunityEstacionaria.setText('custbody_ptg_entre_las', infoCustomer.values['custrecord_ptg_entre_las.Address']);
                     opportunityEstacionaria.setText('custbody_ptg_y_las', infoCustomer.values['custrecord_ptg_y_las.Address']);
                     opportunityEstacionaria.setText('custbody_ptg_y_las', infoCustomer.values['custrecord_ptg_y_las.Address']);
                     opportunityEstacionaria.setValue('custbody_ptg_zonadeprecioop_', territory);
-                    opportunityEstacionaria.setValue('custbody_ptg_origen_servicio', 4);        
+                    opportunityEstacionaria.setValue('custbody_ptg_zona_venta_cc', zone);
+                    opportunityEstacionaria.setValue('custbody_ptg_origen_servicio', 4);
                     opportunityEstacionaria.setValue('custbody_ptg_planta_relacionada', infoCustomer.values['custentity_ptg_plantarelacionada_'].value);
                     opportunityEstacionaria.setValue('custbody_ptg_etiqueta_direccion_envio', infoCustomer.values['addresslabel']);
                     if (infoCustomer.values.isMoorning) {
@@ -1879,38 +2162,62 @@ define(['N/format', 'N/record', 'N/search'],
                     opportunityEstacionaria.setValue('shipaddresslist', Number(infoCustomer.values['addressinternalid.Address']));
                     (getWeek == 0) ? getWeek = 7 : getWeek = getWeek;
                     let day = [getWeek];
-                    //log.debug('day of week', day);
-                    //opportunityEstacionaria.setValue('custbody_ptg_dia_semana', day);
-                    //opportunityEstacionaria.setValue('subsidiary', infoCustomer.values.subsidiary.value);
                     let today = new Date();
-                    //today = today.setDate(today.getDate()+1);
                     today.setDate(today.getDate() + 1);
                     //log.debug('today add', today)
                     opportunityEstacionaria.setText('expectedclosedate', infoCustomer.values['exceptDate']);
 
                     if (Number(priceZoneValue) > 0) {
                         //opportunityEstacionaria.insertLine({ sublistId: 'item', line: 0 });
-                        opportunityEstacionaria.selectNewLine({ sublistId: 'item' });
-                        opportunityEstacionaria.setCurrentSublistValue({ sublistId: 'item', fieldId: 'item', value: Number(infoCustomer.values["custrecord_ptg_articulo_frecuente2.Address"].value) });
-                        opportunityEstacionaria.setCurrentSublistValue({ sublistId: 'item', fieldId: 'quantity', value: Number(infoCustomer.values["custrecord_ptg_capacidad_can_articulo_2.Address"]) });
-                        opportunityEstacionaria.setCurrentSublistValue({ sublistId: 'item', fieldId: 'rate', value: Number(priceZoneValue) });
+                        opportunityEstacionaria.selectNewLine({
+                            sublistId: 'item'
+                        });
+                        opportunityEstacionaria.setCurrentSublistValue({
+                            sublistId: 'item',
+                            fieldId: 'item',
+                            value: Number(infoCustomer.values["custrecord_ptg_articulo_frecuente2.Address"].value)
+                        });
+                        opportunityEstacionaria.setCurrentSublistValue({
+                            sublistId: 'item',
+                            fieldId: 'quantity',
+                            value: Number(infoCustomer.values["custrecord_ptg_capacidad_can_articulo_2.Address"])
+                        });
+                        opportunityEstacionaria.setCurrentSublistValue({
+                            sublistId: 'item',
+                            fieldId: 'rate',
+                            value: Number(priceZoneValue)
+                        });
                         // let finalAmount = Number(priceZoneValue) * Number(infoCustomer.values.custentity_ptg_cantidad_frecuente_lt_cil);
                         // opportunityEstacionaria.setCurrentSublistValue({ sublistId: 'item', fieldId: 'amount', value: finalAmount });                                        
-                        opportunityEstacionaria.commitLine({ sublistId: 'item' });
+                        opportunityEstacionaria.commitLine({
+                            sublistId: 'item'
+                        });
                         let finalRate = Number(infoCustomer.values["custrecord_ptg_capacidad_can_articulo_2.Address"]) * Number(priceZoneValue);
                         //Agregamos linea de descuento
                         let totalTransaction = finalRate * 1.16;
-                        if(!!infoCustomer.values['custentity_ptg_tipo_descuento'] && !!infoCustomer.values['custentity_ptg_tipo_descuento'].value){
+                        if (!!infoCustomer.values['custentity_ptg_tipo_descuento'] && !!infoCustomer.values['custentity_ptg_tipo_descuento'].value) {
                             let factorConversion = getFactorConversion(infoCustomer.values['custrecord_ptg_colonia_ruta.Address'].value) || '';
-                            if(!!factorConversion){                               
+                            if (!!infoCustomer.values['custentity_ptg_descuento_asignar']) {
                                 let finalDiscount = (Number(infoCustomer.values["custrecord_ptg_capacidad_art.Address"]) * Number(infoCustomer.values['custentity_ptg_descuento_asignar'])) / 1.16;
-                                opportunityEstacionaria.selectNewLine({ sublistId: 'item' });
-                                opportunityEstacionaria.setCurrentSublistValue({ sublistId: 'item', fieldId: 'item', value: 4528 });  //prd 4217                                                              
-                                opportunityEstacionaria.setCurrentSublistValue({ sublistId: 'item', fieldId: 'rate', value: (finalDiscount * -1).toFixed(6) });                                
-                                opportunityEstacionaria.commitLine({ sublistId: 'item' });   
-                                
+                                opportunityEstacionaria.selectNewLine({
+                                    sublistId: 'item'
+                                });
+                                opportunityEstacionaria.setCurrentSublistValue({
+                                    sublistId: 'item',
+                                    fieldId: 'item',
+                                    value: 4528
+                                });
+                                opportunityEstacionaria.setCurrentSublistValue({
+                                    sublistId: 'item',
+                                    fieldId: 'rate',
+                                    value: (finalDiscount * -1).toFixed(6)
+                                });
+                                opportunityEstacionaria.commitLine({
+                                    sublistId: 'item'
+                                });
+
                                 totalTransaction -= (finalDiscount * 1.16)
-                            }                                                        
+                            }
                         }
                         //
                         let isOkCreditOrContract;
@@ -1983,12 +2290,30 @@ define(['N/format', 'N/record', 'N/search'],
                                 fieldId: infoCustomer.values['idFieldDate'],
                                 text: infoCustomer.values['dateToUpdate']
                             });
+
+                            addressSubrecord.setValue({
+                                fieldId: 'custrecord_drt_pm_estado',
+                                value: 513
+                            });
+
+                            addressSubrecord.setValue({
+                                fieldId: 'custrecord_drt_pm_ciudad',
+                                value: 584
+                            });
+
+                            addressSubrecord.setValue({
+                                fieldId: 'custrecord_disa_zona_pm',
+                                value: 595
+                            });
                         }
 
                         customerRecord.commitLine({
                             sublistId: "addressbook"
                         });
-                        let idUpdateDate = customerRecord.save();
+                        let idUpdateDate = customerRecord.save({
+                            enableSourcing: true,
+                            ignoreMandatoryFields: true
+                        });
                         log.debug('se actualizo la fecha de la direcion', idUpdateDate)
 
                         //}
@@ -1999,8 +2324,6 @@ define(['N/format', 'N/record', 'N/search'],
 
 
         }
-
-
 
         const validExistOp = (customer, type, address, frecuency, lessDate) => {
             log.debug('validExistOp', address)
@@ -2013,78 +2336,105 @@ define(['N/format', 'N/record', 'N/search'],
                 exist: false,
                 isBefore: false
             };
-            let filters;
-            if (type == 2) {
-                filters = [
-                    ["entity", "anyof", customer],
-                    "AND",
-                    ["custbody_ptg_id_direccion_envio", "is", address],
-                    //"AND",
-                    //["custbody_ptg_estado_pedido", "noneof", "5", "3"]
-                    // "AND",
-                    // ["date", "within", "today"],
-                    // "OR",
-                    // ["date", "within", "tomorrow"],
-                    // "AND",
-                    // ["custbody_ptg_estado_pedido", "noneof", "5", "3"],
+            // let filters;
+            // if (type == 2) {
+            //     filters = [
+            //         ["entity", "anyof", customer],
+            //         "AND",
+            //         ["custbody_ptg_id_direccion_envio", "is", address],
 
-                ]
-            } else if (type == 4) {
-                filters = [
-                    ["entity", "anyof", customer],
-                    //"AND",
-                    //["custbody_ptg_estado_pedido", "noneof", "5", "3"],
-                    "AND",
-                    ["custbody_ptg_id_direccion_envio", "is", address],
-                    // "AND",
-                    // // ["date", "within", "today"],
-                    // // "AND",
-                    // ["custbody_ptg_estado_pedido", "noneof", "5", "3"],
-                    // "AND",
-                    // ["custbody_ptg_id_direccion_envio", "is", address]
-                ]
+            //     ]
+            // } else if (type == 4) {
+            //     filters = [
+            //         ["entity", "anyof", customer],
+            //         "AND",
+            //         ["custbody_ptg_id_direccion_envio", "is", address],
+
+            //     ]
+            // }
+
+            if (Number(frecuency) != 3 && Number(frecuency) != 6) {
+                if (!!lessDate && type == 4) {
+                    let today = new Date();
+                    let lessDates = new Date(today.setDate(today.getDate() - Number(lessDate)));
+                    let todayFilter = format.format({
+                        value: new Date(),
+                        type: format.Type.DATE,
+                        timezone: format.Timezone.AMERICA_MEXICO_CITY
+                    });
+
+                    let lessDatesFilter = format.format({
+                        value: lessDates,
+                        type: format.Type.DATE,
+                        timezone: format.Timezone.AMERICA_MEXICO_CITY
+                    });
+
+                    log.debug('todayFilter', todayFilter);
+                    log.debug('lessDatesFilter', lessDatesFilter);
+
+                    // //Cambiar el filtro del status a noneof Cancelado
+                    // filters.push("AND", ["expectedclosedate", "within", lessDatesFilter, todayFilter], "AND",
+                    //     ["custbody_ptg_estado_pedido", "noneof", "5"])
+
+                    let opportunitySearchObj = search.create({
+                        type: "opportunity",
+                        filters: [
+                            ["entity", "anyof", customer],
+                            "AND",
+                            ["custbody_ptg_id_direccion_envio", "is", address],
+                            "AND",
+                            ["expectedclosedate", "within", lessDatesFilter, todayFilter],
+                            "AND",
+                            ["custbody_ptg_estado_pedido", "noneof", "5"]
+
+                        ],
+                        columns: [
+                            search.createColumn({
+                                name: "internalid",
+                                label: "Internal ID"
+                            }),
+                            search.createColumn({
+                                name: "expectedclosedate",
+                                sort: search.Sort.DESC,
+                                label: "Expected Close"
+                            })
+                        ]
+                    });
+                    let searchResultCount = opportunitySearchObj.runPaged().count;
+                    log.debug('searchResultCount exist op befored dates', searchResultCount)
+
+                    if (searchResultCount > 0) {
+                        //isExiste.exist = true;
+                        opportunitySearchObj.run().each(function (result) {
+                            // .run().each has a limit of 4,000 results
+                            //isExiste.dateLastService = result.getValue({ name: "expectedclosedate", sort: search.Sort.DESC, label: "Expected Close" });
+                            isExiste.isBefore = true;
+                            return false;
+                        });
+                    }
+                }
             }
-
-            if ((Number(frecuency) != 3 || Number(frecuency) != 6) && type == 4 && !!lessDate) {
-                let today = new Date();
-                let lessDates = new Date(today.setDate(today.getDate() - Number(lessDate)));
-                let todayFilter = format.format({
-                    value: new Date(),
-                    type: format.Type.DATE,
-                    timezone: format.Timezone.AMERICA_MEXICO_CITY
-                });
-
-                let lessDatesFilter = format.format({
-                    value: lessDates,
-                    type: format.Type.DATE,
-                    timezone: format.Timezone.AMERICA_MEXICO_CITY
-                });
-
-                log.debug('todayFilter', todayFilter);
-                log.debug('lessDatesFilter', lessDatesFilter);
-
-                //Cambiar el filtro del status a noneof Cancelado
-                filters.push("AND", ["expectedclosedate", "within", lessDatesFilter, todayFilter], "AND",
-                    ["custbody_ptg_estado_pedido", "noneof", "5"])
-                isExiste.isBefore = true;
-            } else {
-                filters.push("AND", ["custbody_ptg_estado_pedido", "noneof", "5", "3"])
-            }
-
-            log.debug('filtros validaciónExistop', filters)
 
             let opportunitySearchObj = search.create({
                 type: "opportunity",
-                filters: filters,
-                columns:
-                    [
-                        search.createColumn({ name: "internalid", label: "Internal ID" }),
-                        search.createColumn({
-                            name: "expectedclosedate",
-                            sort: search.Sort.DESC,
-                            label: "Expected Close"
-                        })
-                    ]
+                filters: [
+                    ["entity", "anyof", customer],
+                    "AND",
+                    ["custbody_ptg_id_direccion_envio", "is", address],
+                    "AND",
+                    ["custbody_ptg_estado_pedido", "noneof", "5", "3"]
+                ],
+                columns: [
+                    search.createColumn({
+                        name: "internalid",
+                        label: "Internal ID"
+                    }),
+                    search.createColumn({
+                        name: "expectedclosedate",
+                        sort: search.Sort.DESC,
+                        label: "Expected Close"
+                    })
+                ]
             });
             let searchResultCount = opportunitySearchObj.runPaged().count;
             log.debug('searchResultCount exist op', searchResultCount)
@@ -2093,104 +2443,47 @@ define(['N/format', 'N/record', 'N/search'],
                 isExiste.exist = true;
                 opportunitySearchObj.run().each(function (result) {
                     // .run().each has a limit of 4,000 results
-                    isExiste.dateLastService = result.getValue({ name: "expectedclosedate", sort: search.Sort.DESC, label: "Expected Close" });
+                    isExiste.exist = true;
+                    isExiste.dateLastService = result.getValue({
+                        name: "expectedclosedate",
+                        sort: search.Sort.DESC,
+                        label: "Expected Close"
+                    });
                     return false;
                 });
             }
+
             return isExiste
-        }
-
-        const getGenericItem = (type, subsidiary) => {
-            let filters;
-            switch (type) {
-                case '1':
-                    filters = [["type", "anyof", "InvtPart"],
-                        "AND",
-                    ["custitem_ptg_tipodearticulo_", "anyof", "1"],
-                        "AND",
-                    ["subsidiary", "anyof", subsidiary]]
-                    break;
-                case '2':
-                    filters = [["type", "anyof", "InvtPart"],
-                        "AND",
-                    ["custitem_ptg_tipodearticulo_", "anyof", "2"],
-                        "AND",
-                    ["subsidiary", "anyof", subsidiary]]
-                    break;
-
-                //Este queda pendiente del global de momento se dejara 4 , hasta que se cambie el nombre
-                case '4':
-                    filters = [["type", "anyof", "InvtPart"],
-                        "AND",
-                    ["custitem_ptg_tipodearticulo_", "anyof", "1"],
-                        "AND",
-                    ["subsidiary", "anyof", subsidiary]]
-                    break;
-
-            }
-
-            //log.debug('filtros articulos genericos', filters)
-
-            let inventoryitemSearchObj = search.create({
-                type: "inventoryitem",
-                filters: filters,
-                columns:
-                    [
-                        search.createColumn({
-                            name: "itemid",
-                            sort: search.Sort.ASC,
-                            label: "Name"
-                        }),
-                        search.createColumn({ name: "displayname", label: "Display Name" }),
-                        search.createColumn({ name: "salesdescription", label: "Description" }),
-                        search.createColumn({ name: "type", label: "Type" }),
-                        search.createColumn({ name: "baseprice", label: "Base Price" }),
-                        search.createColumn({ name: "custitem_4601_defaultwitaxcode", label: "Default WT Code" })
-                    ]
-            });
-            let searchResultCount = inventoryitemSearchObj.runPaged().count;
-            if (searchResultCount > 0) {
-                let item;
-                inventoryitemSearchObj.run().each(function (result) {
-                    // .run().each has a limit of 4,000 results
-                    item = result.id
-                    log.debug('result', result)
-
-                    return false;
-                });
-
-                return item;
-            }
-
         }
 
         const getPriceZone = (zone, type) => {
             log.debug('zone', zone);
             let customrecord_ptg_coloniasrutas_SearchObj = search.create({
                 type: "customrecord_ptg_coloniasrutas_",
-                filters:
-                    [
-                        ["internalid", "anyof", zone]
-                    ],
-                columns:
-                    [
-                        search.createColumn({
-                            name: "custrecord_ptg_precio_",
-                            join: "CUSTRECORD_PTG_ZONA_DE_PRECIO_",
-                            label: "PTG - PRECIO"
-                        }),
-                        search.createColumn({
-                            name: "custrecord_ptg_territorio_",
-                            join: "CUSTRECORD_PTG_ZONA_DE_PRECIO_",
-                            label: "PTG - Territorio"
-                        }),
-                        search.createColumn({ name: "custrecord_ptg_zona_de_precio_", label: "PTG - Zona de Precio" }),
-                        search.createColumn({
-                            name: "custrecord_ptg_precio_kg",
-                            join: "CUSTRECORD_PTG_ZONA_DE_PRECIO_",
-                            label: "PTG - PRECIO POR KG"
-                        }),
-                    ]
+                filters: [
+                    ["internalid", "anyof", zone]
+                ],
+                columns: [
+                    search.createColumn({
+                        name: "custrecord_ptg_precio_",
+                        join: "CUSTRECORD_PTG_ZONA_DE_PRECIO_",
+                        label: "PTG - PRECIO"
+                    }),
+                    search.createColumn({
+                        name: "custrecord_ptg_territorio_",
+                        join: "CUSTRECORD_PTG_ZONA_DE_PRECIO_",
+                        label: "PTG - Territorio"
+                    }),
+                    search.createColumn({
+                        name: "custrecord_ptg_zona_de_precio_",
+                        label: "PTG - Zona de Precio"
+                    }),
+                    search.createColumn({
+                        name: "custrecord_ptg_precio_kg",
+                        join: "CUSTRECORD_PTG_ZONA_DE_PRECIO_",
+                        label: "PTG - PRECIO POR KG"
+                    }),
+                ]
             });
             let searchResultCount = customrecord_ptg_coloniasrutas_SearchObj.runPaged().count;
             if (searchResultCount > 0) {
@@ -2224,18 +2517,16 @@ define(['N/format', 'N/record', 'N/search'],
             log.debug('factor conversion', zone);
             let customrecord_ptg_coloniasrutas_SearchObj = search.create({
                 type: "customrecord_ptg_coloniasrutas_",
-                filters:
-                    [
-                        ["internalid", "anyof", zone]
-                    ],
-                columns:
-                    [
-                        search.createColumn({
-                            name: "custrecord_ptg_factor_conversion",
-                            join: "CUSTRECORD_PTG_ZONA_DE_PRECIO_",
-                            label: "PTG - FACTOR DE CONVERSION"
-                        }),
-                    ]
+                filters: [
+                    ["internalid", "anyof", zone]
+                ],
+                columns: [
+                    search.createColumn({
+                        name: "custrecord_ptg_factor_conversion",
+                        join: "CUSTRECORD_PTG_ZONA_DE_PRECIO_",
+                        label: "PTG - FACTOR DE CONVERSION"
+                    }),
+                ]
             });
             let searchResultCount = customrecord_ptg_coloniasrutas_SearchObj.runPaged().count;
             if (searchResultCount > 0) {
@@ -2262,24 +2553,25 @@ define(['N/format', 'N/record', 'N/search'],
             //log.debug('zone', zone);
             let customrecord_ptg_coloniasrutas_SearchObj = search.create({
                 type: "customrecord_ptg_coloniasrutas_",
-                filters:
-                    [
-                        ["internalid", "anyof", zone]
-                    ],
-                columns:
-                    [
-                        search.createColumn({
-                            name: "custrecord_ptg_precio_",
-                            join: "CUSTRECORD_PTG_ZONA_DE_PRECIO_",
-                            label: "PTG - PRECIO"
-                        }),
-                        search.createColumn({
-                            name: "custrecord_ptg_territorio_",
-                            join: "CUSTRECORD_PTG_ZONA_DE_PRECIO_",
-                            label: "PTG - Territorio"
-                        }),
-                        search.createColumn({ name: "custrecord_ptg_zona_de_precio_", label: "PTG - Zona de Precio" }),
-                    ]
+                filters: [
+                    ["internalid", "anyof", zone]
+                ],
+                columns: [
+                    search.createColumn({
+                        name: "custrecord_ptg_precio_",
+                        join: "CUSTRECORD_PTG_ZONA_DE_PRECIO_",
+                        label: "PTG - PRECIO"
+                    }),
+                    search.createColumn({
+                        name: "custrecord_ptg_territorio_",
+                        join: "CUSTRECORD_PTG_ZONA_DE_PRECIO_",
+                        label: "PTG - Territorio"
+                    }),
+                    search.createColumn({
+                        name: "custrecord_ptg_zona_de_precio_",
+                        label: "PTG - Zona de Precio"
+                    }),
+                ]
             });
             let searchResultCount = customrecord_ptg_coloniasrutas_SearchObj.runPaged().count;
             if (searchResultCount > 0) {
@@ -2288,12 +2580,46 @@ define(['N/format', 'N/record', 'N/search'],
                     // .run().each has a limit of 4,000 results
                     //log.debug('result zone', result)
                     territory = result.getValue({
-                        name: "custrecord_ptg_zona_de_precio_", label: "PTG - Zona de Precio"
+                        name: "custrecord_ptg_zona_de_precio_",
+                        label: "PTG - Zona de Precio"
                     })
                     return true;
                 });
 
                 return territory;
+            }
+
+
+        }
+
+        const getSaleZone = (zone) => {
+            //log.debug('zone', zone);
+            let customrecord_ptg_coloniasrutas_SearchObj = search.create({
+                type: "customrecord_ptg_coloniasrutas_",
+                filters: [
+                    ["internalid", "anyof", zone]
+                ],
+                columns: [
+                    search.createColumn({
+                        name: "custrecord_ptg_zona_venta",
+                        label: "PTG - ZONA DE VENTA"
+                    }),
+                ]
+            });
+            let searchResultCount = customrecord_ptg_coloniasrutas_SearchObj.runPaged().count;
+            if (searchResultCount > 0) {
+                let saleZone;
+                customrecord_ptg_coloniasrutas_SearchObj.run().each(function (result) {
+                    // .run().each has a limit of 4,000 results
+                    //log.debug('result zone', result)
+                    saleZone = result.getValue({
+                        name: "custrecord_ptg_zona_venta",
+                        label: "PTG - ZONA DE VENTA"
+                    })
+                    return true;
+                });
+
+                return saleZone;
             }
 
 
@@ -2359,14 +2685,27 @@ define(['N/format', 'N/record', 'N/search'],
             };
 
             thereAreAnyError(summaryContext)
-            log.audit('Summary', [
-                { title: 'Usage units consumed', details: summaryContext.usage },
-                { title: 'Concurrency', details: summaryContext.concurrency },
-                { title: 'Number of yields', details: summaryContext.yields }
+            log.audit('Summary', [{
+                title: 'Usage units consumed',
+                details: summaryContext.usage
+            },
+            {
+                title: 'Concurrency',
+                details: summaryContext.concurrency
+            },
+            {
+                title: 'Number of yields',
+                details: summaryContext.yields
+            }
             ]);
 
         }
 
-        return { getInputData, map, reduce, summarize }
+        return {
+            getInputData,
+            map,
+            reduce,
+            summarize
+        }
 
     });
